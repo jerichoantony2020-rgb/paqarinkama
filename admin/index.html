@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Panel Admin — PAQARINKAMA</title>
+<title>Panel Admin â€” PAQARINKAMA</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
@@ -178,15 +178,15 @@ a{text-decoration:none;color:inherit;}
 <!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-card">
-    <div class="login-badge">🌿 Área restringida</div>
+    <div class="login-badge">ðŸŒ¿ Ãrea restringida</div>
     <div class="login-logo">PAQARINKAMA</div>
-    <p class="login-sub">Panel de administración interno<br/>Solo para el equipo</p>
-    <label class="login-label" for="loginEmail">Correo electrónico</label>
+    <p class="login-sub">Panel de administraciÃ³n interno<br/>Solo para el equipo</p>
+    <label class="login-label" for="loginEmail">Correo electrÃ³nico</label>
     <input class="login-input" type="email" id="loginEmail" placeholder="admin@paqarinkama.org" autocomplete="email"/>
-    <label class="login-label" for="loginPw">Contraseña</label>
-    <input class="login-input" type="password" id="loginPw" placeholder="••••••••" autocomplete="current-password"/>
+    <label class="login-label" for="loginPw">ContraseÃ±a</label>
+    <input class="login-input" type="password" id="loginPw" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" autocomplete="current-password"/>
     <div class="login-error" id="loginError"></div>
-    <button class="login-btn" id="loginBtn" onclick="doLogin()">Acceder al panel →</button>
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">Acceder al panel â†’</button>
     <p class="login-hint">Acceso exclusivo para el equipo PAQARINKAMA.<br/>Los cambios se publican en tiempo real.</p>
   </div>
 </div>
@@ -195,19 +195,19 @@ a{text-decoration:none;color:inherit;}
 <div id="adminApp">
   <aside class="sidebar">
     <div class="sidebar-logo">
-      <span class="sidebar-logo-icon">🌿</span>
+      <span class="sidebar-logo-icon">ðŸŒ¿</span>
       <div class="sidebar-logo-text">PAQARINKAMA<small>Panel Admin</small></div>
     </div>
     <nav class="sidebar-nav">
       <div class="nav-section-label">General</div>
-      <div class="nav-item active" onclick="showPanel('dashboard',this)"><span class="ni-icon">🏠</span><span>Dashboard</span></div>
+      <div class="nav-item active" onclick="showPanel('dashboard',this)"><span class="ni-icon">ðŸ </span><span>Dashboard</span></div>
       <div class="nav-section-label">Contenido</div>
-      <div class="nav-item" onclick="showPanel('galeria',this)"><span class="ni-icon">📷</span><span>Galería</span></div>
-      <div class="nav-item" onclick="showPanel('actividades',this)"><span class="ni-icon">📋</span><span>Actividades</span></div>
-      <div class="nav-item" onclick="showPanel('textos',this)"><span class="ni-icon">✏️</span><span>Textos</span></div>
+      <div class="nav-item" onclick="showPanel('galeria',this)"><span class="ni-icon">ðŸ“·</span><span>GalerÃ­a</span></div>
+      <div class="nav-item" onclick="showPanel('actividades',this)"><span class="ni-icon">ðŸ“‹</span><span>Actividades</span></div>
+      <div class="nav-item" onclick="showPanel('textos',this)"><span class="ni-icon">âœï¸</span><span>Textos</span></div>
     </nav>
     <div class="sidebar-footer">
-      <span class="logout-link" onclick="doLogout()">Cerrar sesión</span>
+      <span class="logout-link" onclick="doLogout()">Cerrar sesiÃ³n</span>
     </div>
   </aside>
 
@@ -223,7 +223,7 @@ a{text-decoration:none;color:inherit;}
           <div class="user-avatar" id="userAvatar">A</div>
           <span id="userEmail" style="display:none"></span>
         </div>
-        <button class="topbar-btn topbar-btn-outline" onclick="window.open('../','_blank')">👁 Ver sitio</button>
+        <button class="topbar-btn topbar-btn-outline" onclick="window.open('../','_blank')">ðŸ‘ Ver sitio</button>
       </div>
     </div>
 
@@ -234,32 +234,32 @@ a{text-decoration:none;color:inherit;}
         <div class="panel-title">Dashboard</div>
         <p class="panel-desc">Todo lo que ocurre en PAQARINKAMA, de un vistazo.</p>
         <div class="dash-stats">
-          <div class="stat-card hl"><div class="s-label">Fotos en galería</div><div class="s-value" id="statFotos">—</div><div class="s-sub">de 6 slots disponibles</div></div>
-          <div class="stat-card"><div class="s-label">Actividades</div><div class="s-value" id="statActs">—</div><div class="s-sub">publicadas en total</div></div>
-          <div class="stat-card"><div class="s-label">Textos editados</div><div class="s-value" id="statTexts">—</div><div class="s-sub">campos personalizados</div></div>
-          <div class="stat-card"><div class="s-label">Estado</div><div class="s-value" style="font-size:1.1rem;color:var(--g600)">● En línea</div><div class="s-sub">Supabase conectado</div></div>
+          <div class="stat-card hl"><div class="s-label">Fotos en galerÃ­a</div><div class="s-value" id="statFotos">â€”</div><div class="s-sub">de 6 slots disponibles</div></div>
+          <div class="stat-card"><div class="s-label">Actividades</div><div class="s-value" id="statActs">â€”</div><div class="s-sub">publicadas en total</div></div>
+          <div class="stat-card"><div class="s-label">Textos editados</div><div class="s-value" id="statTexts">â€”</div><div class="s-sub">campos personalizados</div></div>
+          <div class="stat-card"><div class="s-label">Estado</div><div class="s-value" style="font-size:1.1rem;color:var(--g600)">â— En lÃ­nea</div><div class="s-sub">Supabase conectado</div></div>
         </div>
         <div class="dash-grid">
           <div class="dash-card">
-            <h3>Accesos rápidos</h3>
-            <div class="quick-item"><span class="qi-dot" style="background:#6db863"></span><span class="qi-text">Subir fotos a la galería</span><button class="btn btn-sm btn-outline" onclick="showPanel('galeria',document.querySelectorAll('.nav-item')[1])">Ir →</button></div>
-            <div class="quick-item"><span class="qi-dot" style="background:#4e9a44"></span><span class="qi-text">Publicar nueva actividad</span><button class="btn btn-sm btn-outline" onclick="showPanel('actividades',document.querySelectorAll('.nav-item')[2])">Ir →</button></div>
-            <div class="quick-item"><span class="qi-dot" style="background:#3d8035"></span><span class="qi-text">Editar textos del sitio</span><button class="btn btn-sm btn-outline" onclick="showPanel('textos',document.querySelectorAll('.nav-item')[3])">Ir →</button></div>
+            <h3>Accesos rÃ¡pidos</h3>
+            <div class="quick-item"><span class="qi-dot" style="background:#6db863"></span><span class="qi-text">Subir fotos a la galerÃ­a</span><button class="btn btn-sm btn-outline" onclick="showPanel('galeria',document.querySelectorAll('.nav-item')[1])">Ir â†’</button></div>
+            <div class="quick-item"><span class="qi-dot" style="background:#4e9a44"></span><span class="qi-text">Publicar nueva actividad</span><button class="btn btn-sm btn-outline" onclick="showPanel('actividades',document.querySelectorAll('.nav-item')[2])">Ir â†’</button></div>
+            <div class="quick-item"><span class="qi-dot" style="background:#3d8035"></span><span class="qi-text">Editar textos del sitio</span><button class="btn btn-sm btn-outline" onclick="showPanel('textos',document.querySelectorAll('.nav-item')[3])">Ir â†’</button></div>
           </div>
           <div class="dash-card">
-            <h3>Cómo funciona</h3>
-            <div class="dash-tip"><strong>1. Edita</strong> desde este panel.<br/><strong>2. Los cambios</strong> se guardan en Supabase.<br/><strong>3. El sitio público</strong> los muestra al instante — sin exportar ni resubir nada.</div>
+            <h3>CÃ³mo funciona</h3>
+            <div class="dash-tip"><strong>1. Edita</strong> desde este panel.<br/><strong>2. Los cambios</strong> se guardan en Supabase.<br/><strong>3. El sitio pÃºblico</strong> los muestra al instante â€” sin exportar ni resubir nada.</div>
           </div>
         </div>
       </div>
 
-      <!-- GALERÍA -->
+      <!-- GALERÃA -->
       <div class="panel" id="panel-galeria">
-        <div class="panel-title">Galería de fotos</div>
+        <div class="panel-title">GalerÃ­a de fotos</div>
         <p class="panel-desc">Sube hasta 6 fotos. Se guardan en Supabase Storage y aparecen en el sitio en segundos.</p>
         <div class="gal-grid" id="galGrid"></div>
         <input type="file" id="galFileInput" accept="image/*" style="display:none"/>
-        <p class="gal-hint">💡 Las fotos se suben al servidor — cualquier visitante las verá al abrir el sitio.</p>
+        <p class="gal-hint">ðŸ’¡ Las fotos se suben al servidor â€” cualquier visitante las verÃ¡ al abrir el sitio.</p>
       </div>
 
       <!-- ACTIVIDADES -->
@@ -267,8 +267,8 @@ a{text-decoration:none;color:inherit;}
         <div class="act-form-card">
           <h3>+ Nueva actividad</h3>
           <div class="fg2">
-            <div class="field"><label>Título *</label><input id="fTitle" type="text" placeholder="Ej: Taller de lectura en el colegio San Blas"/></div>
-            <div class="field"><label>Categoría</label>
+            <div class="field"><label>TÃ­tulo *</label><input id="fTitle" type="text" placeholder="Ej: Taller de lectura en el colegio San Blas"/></div>
+            <div class="field"><label>CategorÃ­a</label>
               <select id="fCat">
                 <option value="taller">Taller</option>
                 <option value="docentes">Docentes</option>
@@ -281,7 +281,7 @@ a{text-decoration:none;color:inherit;}
             <div class="field"><label>Fecha</label><input id="fDate" type="text" placeholder="Ej: Junio 2025"/></div>
             <div class="field"><label>Autor / Voluntario</label><input id="fAuthor" type="text" placeholder="Nombre completo"/></div>
           </div>
-          <div class="field"><label>Descripción</label><textarea id="fDesc" placeholder="Describe brevemente qué ocurrió..."></textarea></div>
+          <div class="field"><label>DescripciÃ³n</label><textarea id="fDesc" placeholder="Describe brevemente quÃ© ocurriÃ³..."></textarea></div>
           <button class="btn btn-primary" id="addActBtn" onclick="addActivity()">+ Publicar actividad</button>
         </div>
         <div class="act-list-wrap">
@@ -295,21 +295,21 @@ a{text-decoration:none;color:inherit;}
         <div class="panel-title">Editar textos</div>
         <p class="panel-desc">Modifica los textos del sitio. Los cambios aparecen al instante para todos los visitantes.</p>
         <div class="txt-section">
-          <h3>🌟 Sección Hero</h3>
+          <h3>ðŸŒŸ SecciÃ³n Hero</h3>
           <div class="fg2">
-            <div class="field"><label>Título principal</label><input id="tHeroTitle" type="text"/></div>
+            <div class="field"><label>TÃ­tulo principal</label><input id="tHeroTitle" type="text"/></div>
             <div class="field"><label>Texto en cursiva verde</label><input id="tHeroAccent" type="text"/></div>
           </div>
-          <div class="field"><label>Descripción</label><textarea id="tHeroDesc"></textarea></div>
+          <div class="field"><label>DescripciÃ³n</label><textarea id="tHeroDesc"></textarea></div>
         </div>
         <div class="txt-section">
-          <h3>👥 Nosotros</h3>
-          <div class="field"><label>Párrafo 1</label><textarea id="tAbout1"></textarea></div>
-          <div class="field"><label>Párrafo 2</label><textarea id="tAbout2"></textarea></div>
+          <h3>ðŸ‘¥ Nosotros</h3>
+          <div class="field"><label>PÃ¡rrafo 1</label><textarea id="tAbout1"></textarea></div>
+          <div class="field"><label>PÃ¡rrafo 2</label><textarea id="tAbout2"></textarea></div>
           <div class="field"><label>Cita destacada</label><textarea id="tQuote" rows="2"></textarea></div>
         </div>
         <div class="txt-section">
-          <h3>📧 Contacto y redes</h3>
+          <h3>ðŸ“§ Contacto y redes</h3>
           <div class="fg2">
             <div class="field"><label>Correo</label><input id="tEmail" type="email"/></div>
             <div class="field"><label>Instagram URL</label><input id="tInstagram" type="url"/></div>
@@ -319,7 +319,7 @@ a{text-decoration:none;color:inherit;}
             <div class="field"><label>WhatsApp URL</label><input id="tWhatsapp" type="url"/></div>
           </div>
         </div>
-        <button class="btn btn-primary" id="saveTextsBtn" onclick="saveTexts()">✓ Guardar todos los cambios</button>
+        <button class="btn btn-primary" id="saveTextsBtn" onclick="saveTexts()">âœ“ Guardar todos los cambios</button>
       </div>
 
     </div><!-- /content -->
@@ -329,11 +329,11 @@ a{text-decoration:none;color:inherit;}
 <div class="toast" id="toast"></div>
 
 <script>
-/* ══════════════════════════════════════════════
-   SUPABASE CONFIG — mismas credenciales que index.html
-══════════════════════════════════════════════ */
-const SUPA_URL = 'https://TU_PROYECTO.supabase.co';
-const SUPA_KEY = 'TU_ANON_PUBLIC_KEY';
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   SUPABASE CONFIG â€” mismas credenciales que index.html
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+const SUPA_URL = 'https://ydtmsreetpdbaxdjxikc.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkdG1zcmVldHBkYmF4ZGp4aWtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3OTUxNTcsImV4cCI6MjA5NjM3MTE1N30.aRm3tzA0KoKcCIN0adLKKzg-FNX_MaUMGdvU2A6yuak';
 const db = supabase.createClient(SUPA_URL, SUPA_KEY);
 
 const CAT_COLOR = {taller:'#2d6b2a',docentes:'#4e9a44',biblioteca:'#3d8035',evento:'#1a4d1a'};
@@ -342,7 +342,7 @@ const CONTENT_KEYS = ['heroTitle','heroAccent','heroDesc','about1','about2','quo
 
 let currentGalSlot = -1;
 
-/* ── LOGIN ── */
+/* â”€â”€ LOGIN â”€â”€ */
 ['loginEmail','loginPw'].forEach(id => {
   document.getElementById(id).addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 });
@@ -358,8 +358,8 @@ async function doLogin(){
   err.style.display = 'none';
   const { data, error } = await db.auth.signInWithPassword({ email, password: pw });
   if(error){
-    showLoginError('Credenciales incorrectas. Verifica tu correo y contraseña.');
-    btn.disabled = false; btn.textContent = 'Acceder al panel →';
+    showLoginError('Credenciales incorrectas. Verifica tu correo y contraseÃ±a.');
+    btn.disabled = false; btn.textContent = 'Acceder al panel â†’';
   } else {
     const u = data.user;
     document.getElementById('userAvatar').textContent = (u.email||'A').charAt(0).toUpperCase();
@@ -381,11 +381,11 @@ async function doLogout(){
   document.getElementById('loginPw').value = '';
   document.getElementById('loginError').style.display = 'none';
   document.getElementById('loginBtn').disabled = false;
-  document.getElementById('loginBtn').textContent = 'Acceder al panel →';
+  document.getElementById('loginBtn').textContent = 'Acceder al panel â†’';
 }
 
-/* ── NAVIGATION ── */
-const PANEL_TITLES = {dashboard:'Dashboard',galeria:'Galería',actividades:'Actividades',textos:'Textos'};
+/* â”€â”€ NAVIGATION â”€â”€ */
+const PANEL_TITLES = {dashboard:'Dashboard',galeria:'GalerÃ­a',actividades:'Actividades',textos:'Textos'};
 
 function showPanel(id, navEl){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
@@ -395,13 +395,13 @@ function showPanel(id, navEl){
   document.getElementById('topbarTitle').textContent = PANEL_TITLES[id]||id;
 }
 
-/* ── INIT ── */
+/* â”€â”€ INIT â”€â”€ */
 async function initApp(){
   await Promise.all([initGallery(), loadActivities(), loadTexts()]);
   updateStats();
 }
 
-/* ── GALLERY ── */
+/* â”€â”€ GALLERY â”€â”€ */
 async function initGallery(){
   const { data: rows } = await db.from('gallery').select('*').order('slot_index');
   const map = {};
@@ -416,10 +416,10 @@ async function initGallery(){
     slot.dataset.slot = i;
     slot.innerHTML = `
       <img src="${item.image_url||''}" alt=""/>
-      <div class="gal-ph"><span class="gal-ph-icon">📷</span><p>Clic para subir foto</p></div>
+      <div class="gal-ph"><span class="gal-ph-icon">ðŸ“·</span><p>Clic para subir foto</p></div>
       <div class="gal-spinner"><span class="spinner"></span> Subiendo...</div>
-      <div class="gal-lbl"><input type="text" value="${item.label||''}" placeholder="Descripción..." data-slot="${i}"/></div>
-      <button class="gal-rm" data-slot="${i}" title="Quitar foto">✕</button>
+      <div class="gal-lbl"><input type="text" value="${item.label||''}" placeholder="DescripciÃ³n..." data-slot="${i}"/></div>
+      <button class="gal-rm" data-slot="${i}" title="Quitar foto">âœ•</button>
     `;
     slot.addEventListener('click', function(e){
       if(e.target.tagName==='INPUT'||e.target.classList.contains('gal-rm')) return;
@@ -437,7 +437,7 @@ async function initGallery(){
       const val = this.value;
       t = setTimeout(async ()=>{
         await db.from('gallery').upsert({ slot_index: idx, label: val });
-        toast('💾 Descripción guardada');
+        toast('ðŸ’¾ DescripciÃ³n guardada');
       }, 800);
     });
   });
@@ -450,7 +450,7 @@ async function initGallery(){
       await db.storage.from('gallery').remove([`slot-${idx}`]);
       // Update DB
       await db.from('gallery').upsert({ slot_index: idx, image_url: null, label: '' });
-      toast('🗑 Foto eliminada');
+      toast('ðŸ—‘ Foto eliminada');
       initGallery();
       updateStats();
     });
@@ -474,7 +474,7 @@ document.getElementById('galFileInput').addEventListener('change', async functio
     contentType: 'image/jpeg', upsert: true
   });
 
-  if(upErr){ toast('⚠️ Error al subir: '+upErr.message,'#dc2626'); slot.classList.remove('uploading'); return; }
+  if(upErr){ toast('âš ï¸ Error al subir: '+upErr.message,'#dc2626'); slot.classList.remove('uploading'); return; }
 
   const { data: urlData } = db.storage.from('gallery').getPublicUrl(path);
   const publicUrl = urlData.publicUrl + '?t=' + Date.now(); // cache bust
@@ -486,7 +486,7 @@ document.getElementById('galFileInput').addEventListener('change', async functio
   await db.from('gallery').upsert({ slot_index: idx, image_url: urlData.publicUrl, label });
 
   slot.classList.remove('uploading');
-  toast('✅ Foto publicada en el sitio');
+  toast('âœ… Foto publicada en el sitio');
   initGallery();
   updateStats();
   this.value = '';
@@ -509,7 +509,7 @@ function compressImage(file, maxPx, quality){
   });
 }
 
-/* ── ACTIVITIES ── */
+/* â”€â”€ ACTIVITIES â”€â”€ */
 async function loadActivities(){
   const { data: acts } = await db.from('activities').select('*').order('created_at',{ascending:false});
   renderActList(acts||[]);
@@ -518,7 +518,7 @@ async function loadActivities(){
 function renderActList(acts){
   const body = document.getElementById('actListBody');
   document.getElementById('actCount').textContent = acts.length + ' total';
-  if(!acts.length){ body.innerHTML='<div class="act-empty">No hay actividades aún. ¡Publica la primera!</div>'; return; }
+  if(!acts.length){ body.innerHTML='<div class="act-empty">No hay actividades aÃºn. Â¡Publica la primera!</div>'; return; }
   body.innerHTML='';
   acts.forEach(act=>{
     const row = document.createElement('div');
@@ -527,21 +527,21 @@ function renderActList(acts){
       <span class="act-row-cat" style="background:${CAT_COLOR[act.cat]||'#2d6b2a'}">${CAT_LABEL[act.cat]||act.cat}</span>
       <div class="act-row-info">
         <strong>${act.title}</strong>
-        <span>${[act.date, act.author].filter(Boolean).join(' · ')}</span>
+        <span>${[act.date, act.author].filter(Boolean).join(' Â· ')}</span>
       </div>
       ${act.is_orig
         ? '<span class="act-row-badge">Original</span>'
-        : `<button class="act-row-del" data-id="${act.id}" title="Eliminar">✕</button>`
+        : `<button class="act-row-del" data-id="${act.id}" title="Eliminar">âœ•</button>`
       }
     `;
     body.appendChild(row);
   });
   body.querySelectorAll('.act-row-del').forEach(btn=>{
     btn.addEventListener('click', async function(){
-      if(!confirm('¿Eliminar esta actividad del sitio?')) return;
+      if(!confirm('Â¿Eliminar esta actividad del sitio?')) return;
       const { error } = await db.from('activities').delete().eq('id', this.dataset.id);
-      if(error){ toast('⚠️ '+error.message,'#dc2626'); return; }
-      toast('🗑 Actividad eliminada del sitio');
+      if(error){ toast('âš ï¸ '+error.message,'#dc2626'); return; }
+      toast('ðŸ—‘ Actividad eliminada del sitio');
       loadActivities(); updateStats();
     });
   });
@@ -553,7 +553,7 @@ async function addActivity(){
   const date   = document.getElementById('fDate').value.trim();
   const author = document.getElementById('fAuthor').value.trim();
   const desc   = document.getElementById('fDesc').value.trim();
-  if(!title){ toast('⚠️ El título es obligatorio','#dc2626'); return; }
+  if(!title){ toast('âš ï¸ El tÃ­tulo es obligatorio','#dc2626'); return; }
 
   const btn = document.getElementById('addActBtn');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Publicando...';
@@ -562,14 +562,14 @@ async function addActivity(){
 
   btn.disabled = false; btn.innerHTML = '+ Publicar actividad';
 
-  if(error){ toast('⚠️ '+error.message,'#dc2626'); return; }
+  if(error){ toast('âš ï¸ '+error.message,'#dc2626'); return; }
 
   ['fTitle','fDate','fAuthor','fDesc'].forEach(id=>document.getElementById(id).value='');
-  toast('✅ Actividad publicada en el sitio');
+  toast('âœ… Actividad publicada en el sitio');
   loadActivities(); updateStats();
 }
 
-/* ── TEXTS ── */
+/* â”€â”€ TEXTS â”€â”€ */
 async function loadTexts(){
   const { data: rows } = await db.from('content').select('*');
   if(!rows) return;
@@ -593,26 +593,26 @@ async function saveTexts(){
 
   const { error } = await db.from('content').upsert(rows, { onConflict: 'key' });
 
-  btn.disabled = false; btn.innerHTML = '✓ Guardar todos los cambios';
+  btn.disabled = false; btn.innerHTML = 'âœ“ Guardar todos los cambios';
 
-  if(error){ toast('⚠️ '+error.message,'#dc2626'); return; }
-  toast('✅ Textos guardados y visibles en el sitio');
+  if(error){ toast('âš ï¸ '+error.message,'#dc2626'); return; }
+  toast('âœ… Textos guardados y visibles en el sitio');
   updateStats();
 }
 
-/* ── STATS ── */
+/* â”€â”€ STATS â”€â”€ */
 async function updateStats(){
   const [{ count: galCount }, { count: actCount }, { count: txtCount }] = await Promise.all([
     db.from('gallery').select('*',{count:'exact',head:true}).not('image_url','is',null),
     db.from('activities').select('*',{count:'exact',head:true}),
     db.from('content').select('*',{count:'exact',head:true}),
   ]);
-  document.getElementById('statFotos').textContent = galCount ?? '—';
-  document.getElementById('statActs').textContent  = actCount ?? '—';
-  document.getElementById('statTexts').textContent = txtCount ?? '—';
+  document.getElementById('statFotos').textContent = galCount ?? 'â€”';
+  document.getElementById('statActs').textContent  = actCount ?? 'â€”';
+  document.getElementById('statTexts').textContent = txtCount ?? 'â€”';
 }
 
-/* ── TOAST ── */
+/* â”€â”€ TOAST â”€â”€ */
 let toastTimer;
 function toast(msg, bg){
   const el = document.getElementById('toast');
@@ -622,7 +622,7 @@ function toast(msg, bg){
   toastTimer = setTimeout(()=>el.classList.remove('show'), 3200);
 }
 
-/* ── AUTO-LOGIN si ya hay sesión ── */
+/* â”€â”€ AUTO-LOGIN si ya hay sesiÃ³n â”€â”€ */
 db.auth.getSession().then(({ data:{ session } })=>{
   if(session){
     const u = session.user;
