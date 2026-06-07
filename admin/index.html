@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Panel Admin — PAQARINKAMA</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g900:#0d2b0d;--g800:#1a4d1a;--g700:#2d6b2a;--g600:#3d8035;--g500:#4e9a44;
+  --g400:#6db863;--g300:#95d08c;--g200:#bfe8ba;--g100:#dff2dc;--g50:#f0faf0;
+  --cream:#f7f9f2;--white:#fff;--text:#1a2d1a;--text-mid:#3d5c3a;--text-light:#6b8b68;
+  --border:#d0e6cc;--sidebar:220px;
+  --font-d:'Playfair Display',Georgia,serif;--font-s:'Inter',system-ui,sans-serif;
+  --tr:.22s ease;
+}
+html,body{height:100%;font-family:var(--font-s);color:var(--text);background:var(--cream);}
+button{cursor:pointer;border:none;background:none;font-family:inherit;}
+input,select,textarea{font-family:inherit;}
+a{text-decoration:none;color:inherit;}
+
+/* LOGIN */
+#loginScreen{position:fixed;inset:0;z-index:9999;background:linear-gradient(145deg,var(--g900) 0%,var(--g800) 50%,var(--g700) 100%);display:flex;align-items:center;justify-content:center;}
+#loginScreen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 30%,rgba(109,184,99,.18) 0%,transparent 60%);pointer-events:none;}
+.login-card{background:rgba(255,255,255,.97);border-radius:24px;padding:52px 44px;width:min(420px,92vw);box-shadow:0 32px 80px rgba(0,0,0,.45);position:relative;text-align:center;}
+.login-badge{display:inline-flex;align-items:center;gap:8px;background:var(--g50);color:var(--g700);border:1px solid var(--g200);border-radius:20px;font-size:.75rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:5px 14px;margin-bottom:24px;}
+.login-logo{font-family:var(--font-d);font-size:1.7rem;font-weight:900;color:var(--g800);margin-bottom:6px;}
+.login-sub{font-size:.85rem;color:var(--text-light);margin-bottom:34px;line-height:1.5;}
+.login-label{display:block;text-align:left;font-size:.78rem;font-weight:600;color:var(--text-mid);margin-bottom:6px;}
+.login-input{width:100%;padding:13px 16px;border:2px solid var(--border);border-radius:12px;font-size:.92rem;color:var(--text);background:var(--cream);outline:none;transition:var(--tr);margin-bottom:10px;}
+.login-input:focus{border-color:var(--g500);background:var(--white);box-shadow:0 0 0 4px rgba(78,154,68,.12);}
+.login-error{color:#dc2626;font-size:.8rem;margin-bottom:10px;display:none;}
+.login-btn{width:100%;padding:14px;border-radius:12px;background:var(--g700);color:var(--white);font-size:.95rem;font-weight:700;transition:var(--tr);margin-top:4px;}
+.login-btn:hover{background:var(--g800);}
+.login-btn:disabled{opacity:.6;cursor:not-allowed;}
+.login-hint{font-size:.74rem;color:var(--text-light);margin-top:18px;line-height:1.6;}
+
+/* APP */
+#adminApp{display:none;height:100%;}
+#adminApp.visible{display:flex;}
+.sidebar{width:var(--sidebar);flex-shrink:0;background:var(--g900);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;}
+.sidebar-logo{padding:24px 20px 18px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;}
+.sidebar-logo-icon{font-size:1.4rem;}
+.sidebar-logo-text{font-family:var(--font-d);font-size:.9rem;font-weight:700;color:var(--white);line-height:1.2;}
+.sidebar-logo-text small{display:block;font-family:var(--font-s);font-size:.67rem;font-weight:400;color:var(--g300);margin-top:1px;letter-spacing:.05em;text-transform:uppercase;}
+.sidebar-nav{flex:1;padding:14px 10px;}
+.nav-section-label{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.28);padding:12px 10px 6px;}
+.nav-item{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;color:rgba(255,255,255,.65);font-size:.87rem;font-weight:500;transition:var(--tr);margin-bottom:2px;cursor:pointer;}
+.nav-item:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.9);}
+.nav-item.active{background:var(--g700);color:var(--white);font-weight:600;}
+.nav-item .ni-icon{font-size:1.05rem;width:22px;text-align:center;flex-shrink:0;}
+.sidebar-footer{padding:14px 10px;border-top:1px solid rgba(255,255,255,.08);}
+.logout-link{display:block;text-align:center;font-size:.78rem;color:rgba(255,255,255,.35);transition:var(--tr);cursor:pointer;padding:8px;}
+.logout-link:hover{color:rgba(255,255,255,.7);}
+.main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{background:rgba(247,249,242,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;flex-shrink:0;}
+.topbar-breadcrumb{display:flex;align-items:center;gap:8px;font-size:.88rem;}
+.bc-root{color:var(--text-light);}.bc-sep{color:var(--border);}.bc-current{font-weight:600;color:var(--text);}
+.topbar-actions{display:flex;align-items:center;gap:10px;}
+.topbar-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:20px;font-size:.82rem;font-weight:600;transition:var(--tr);}
+.topbar-btn-outline{border:1.5px solid var(--border);color:var(--text-mid);background:var(--white);}
+.topbar-btn-outline:hover{border-color:var(--g400);color:var(--g600);}
+.topbar-btn-primary{background:var(--g600);color:var(--white);}
+.topbar-btn-primary:hover{background:var(--g700);}
+.user-chip{display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--text-light);}
+.user-avatar{width:28px;height:28px;border-radius:50%;background:var(--g600);color:#fff;font-size:.75rem;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.content{padding:32px;flex:1;}
+.panel{display:none;}.panel.active{display:block;}
+.panel-title{font-family:var(--font-d);font-size:1.6rem;font-weight:700;color:var(--text);margin-bottom:4px;}
+.panel-desc{font-size:.88rem;color:var(--text-light);margin-bottom:28px;line-height:1.5;}
+
+/* DASHBOARD */
+.dash-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.stat-card{background:var(--white);border:1.5px solid var(--border);border-radius:16px;padding:20px 22px;}
+.stat-card.hl{background:linear-gradient(135deg,var(--g700),var(--g800));border-color:var(--g600);}
+.s-label{font-size:.73rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-light);margin-bottom:8px;}
+.stat-card.hl .s-label{color:var(--g200);}
+.s-value{font-family:var(--font-d);font-size:1.9rem;font-weight:700;color:var(--text);}
+.stat-card.hl .s-value{color:var(--white);}
+.s-sub{font-size:.74rem;color:var(--text-light);margin-top:4px;}
+.stat-card.hl .s-sub{color:var(--g300);}
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.dash-card{background:var(--white);border:1.5px solid var(--border);border-radius:16px;padding:22px 24px;}
+.dash-card h3{font-family:var(--font-d);font-size:1rem;font-weight:700;color:var(--text);margin-bottom:16px;}
+.quick-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+.quick-item:last-child{border-bottom:none;}
+.qi-dot{width:8px;height:8px;border-radius:50%;background:var(--g400);flex-shrink:0;}
+.qi-text{flex:1;font-size:.84rem;color:var(--text-mid);}
+.dash-tip{background:var(--g50);border:1.5px solid var(--g200);border-radius:12px;padding:14px 16px;font-size:.82rem;color:var(--g700);line-height:1.7;}
+.dash-tip strong{color:var(--g800);}
+
+/* GALLERY */
+.gal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:8px;}
+.gal-slot{aspect-ratio:4/3;border-radius:14px;overflow:hidden;position:relative;border:2.5px dashed var(--border);background:var(--white);cursor:pointer;transition:var(--tr);}
+.gal-slot:hover{border-color:var(--g400);background:var(--g50);}
+.gal-slot.filled{border-style:solid;border-color:var(--g300);}
+.gal-slot img{width:100%;height:100%;object-fit:cover;display:none;}
+.gal-slot.filled img{display:block;}
+.gal-ph{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:7px;color:var(--text-light);pointer-events:none;}
+.gal-ph-icon{font-size:2rem;}
+.gal-ph p{font-size:.73rem;text-align:center;}
+.gal-slot.filled .gal-ph{display:none;}
+.gal-spinner{position:absolute;inset:0;background:rgba(26,77,26,.5);display:none;align-items:center;justify-content:center;color:#fff;font-size:.85rem;gap:8px;}
+.gal-slot.uploading .gal-spinner{display:flex;}
+.gal-lbl{position:absolute;bottom:0;left:0;right:0;background:rgba(13,43,13,.78);padding:6px 10px;}
+.gal-lbl input{background:none;border:none;color:#fff;font-size:.74rem;width:100%;outline:none;font-family:inherit;}
+.gal-rm{position:absolute;top:7px;right:7px;width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:.85rem;display:none;align-items:center;justify-content:center;border:none;cursor:pointer;}
+.gal-slot.filled .gal-rm{display:flex;}
+.gal-hint{font-size:.76rem;color:var(--text-light);margin-top:6px;line-height:1.5;}
+
+/* ACTIVITIES */
+.act-form-card{background:var(--white);border:1.5px solid var(--border);border-radius:16px;padding:24px;margin-bottom:24px;}
+.act-form-card h3{font-family:var(--font-d);font-size:1rem;font-weight:700;color:var(--text);margin-bottom:18px;}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.field label{font-size:.78rem;font-weight:600;color:var(--text-mid);}
+.field input,.field select,.field textarea{padding:10px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:.87rem;color:var(--text);background:var(--cream);outline:none;transition:var(--tr);resize:vertical;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--g500);background:var(--white);box-shadow:0 0 0 3px rgba(78,154,68,.1);}
+.field textarea{min-height:80px;}
+.act-list-wrap{background:var(--white);border:1.5px solid var(--border);border-radius:16px;overflow:hidden;}
+.act-list-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);}
+.act-list-header h3{font-family:var(--font-d);font-size:1rem;font-weight:700;}
+.act-list-body{max-height:380px;overflow-y:auto;}
+.act-row{display:flex;align-items:center;gap:12px;padding:13px 20px;border-bottom:1px solid var(--border);transition:var(--tr);}
+.act-row:last-child{border-bottom:none;}
+.act-row:hover{background:var(--g50);}
+.act-row-cat{font-size:.68rem;font-weight:700;text-transform:uppercase;padding:3px 9px;border-radius:20px;background:var(--g600);color:#fff;white-space:nowrap;flex-shrink:0;}
+.act-row-info{flex:1;min-width:0;}
+.act-row-info strong{display:block;font-size:.86rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.act-row-info span{font-size:.75rem;color:var(--text-light);}
+.act-row-badge{font-size:.68rem;padding:2px 8px;border-radius:10px;background:var(--g100);color:var(--g700);white-space:nowrap;flex-shrink:0;}
+.act-row-del{width:30px;height:30px;border-radius:50%;background:var(--g50);border:1.5px solid var(--border);color:var(--text-light);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:.85rem;transition:var(--tr);}
+.act-row-del:hover{background:#fee2e2;border-color:#fca5a5;color:#dc2626;}
+.act-empty{padding:32px;text-align:center;color:var(--text-light);font-size:.88rem;}
+
+/* TEXTS */
+.txt-section{background:var(--white);border:1.5px solid var(--border);border-radius:16px;padding:24px;margin-bottom:16px;}
+.txt-section h3{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--g600);margin-bottom:18px;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:11px 22px;border-radius:20px;font-weight:600;font-size:.88rem;cursor:pointer;border:none;font-family:inherit;transition:var(--tr);}
+.btn:disabled{opacity:.55;cursor:not-allowed;}
+.btn-primary{background:var(--g600);color:#fff;}
+.btn-primary:not(:disabled):hover{background:var(--g700);}
+.btn-outline{background:transparent;color:var(--g600);border:1.5px solid var(--g400);}
+.btn-outline:hover{background:var(--g600);color:#fff;}
+.btn-sm{padding:8px 14px;font-size:.81rem;}
+.btn-full{width:100%;justify-content:center;}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;right:28px;background:var(--g800);color:#fff;padding:13px 20px;border-radius:12px;font-size:.86rem;font-weight:500;box-shadow:0 8px 28px rgba(0,0,0,.3);z-index:9999;transform:translateY(20px);opacity:0;transition:all .3s ease;pointer-events:none;display:flex;align-items:center;gap:9px;}
+.toast.show{transform:translateY(0);opacity:1;}
+
+/* SPINNER INLINE */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;}
+
+@media(max-width:900px){
+  .sidebar{width:60px;}
+  .sidebar-logo-text,.nav-item span,.logout-link span{display:none;}
+  .nav-item{justify-content:center;}
+  .main{margin-left:60px;}
+  .dash-stats{grid-template-columns:1fr 1fr;}
+  .dash-grid{grid-template-columns:1fr;}
+}
+@media(max-width:640px){
+  .gal-grid{grid-template-columns:1fr 1fr;}
+  .fg2{grid-template-columns:1fr;}
+  .content{padding:20px 16px;}
+  .topbar{padding:0 16px;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-badge">🌿 Área restringida</div>
+    <div class="login-logo">PAQARINKAMA</div>
+    <p class="login-sub">Panel de administración interno<br/>Solo para el equipo</p>
+    <label class="login-label" for="loginEmail">Correo electrónico</label>
+    <input class="login-input" type="email" id="loginEmail" placeholder="admin@paqarinkama.org" autocomplete="email"/>
+    <label class="login-label" for="loginPw">Contraseña</label>
+    <input class="login-input" type="password" id="loginPw" placeholder="••••••••" autocomplete="current-password"/>
+    <div class="login-error" id="loginError"></div>
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">Acceder al panel →</button>
+    <p class="login-hint">Acceso exclusivo para el equipo PAQARINKAMA.<br/>Los cambios se publican en tiempo real.</p>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="adminApp">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="sidebar-logo-icon">🌿</span>
+      <div class="sidebar-logo-text">PAQARINKAMA<small>Panel Admin</small></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">General</div>
+      <div class="nav-item active" onclick="showPanel('dashboard',this)"><span class="ni-icon">🏠</span><span>Dashboard</span></div>
+      <div class="nav-section-label">Contenido</div>
+      <div class="nav-item" onclick="showPanel('galeria',this)"><span class="ni-icon">📷</span><span>Galería</span></div>
+      <div class="nav-item" onclick="showPanel('actividades',this)"><span class="ni-icon">📋</span><span>Actividades</span></div>
+      <div class="nav-item" onclick="showPanel('textos',this)"><span class="ni-icon">✏️</span><span>Textos</span></div>
+    </nav>
+    <div class="sidebar-footer">
+      <span class="logout-link" onclick="doLogout()">Cerrar sesión</span>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-breadcrumb">
+        <span class="bc-root">PAQARINKAMA</span>
+        <span class="bc-sep">/</span>
+        <span class="bc-current" id="topbarTitle">Dashboard</span>
+      </div>
+      <div class="topbar-actions">
+        <div class="user-chip">
+          <div class="user-avatar" id="userAvatar">A</div>
+          <span id="userEmail" style="display:none"></span>
+        </div>
+        <button class="topbar-btn topbar-btn-outline" onclick="window.open('../','_blank')">👁 Ver sitio</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="panel active" id="panel-dashboard">
+        <div class="panel-title">Dashboard</div>
+        <p class="panel-desc">Todo lo que ocurre en PAQARINKAMA, de un vistazo.</p>
+        <div class="dash-stats">
+          <div class="stat-card hl"><div class="s-label">Fotos en galería</div><div class="s-value" id="statFotos">—</div><div class="s-sub">de 6 slots disponibles</div></div>
+          <div class="stat-card"><div class="s-label">Actividades</div><div class="s-value" id="statActs">—</div><div class="s-sub">publicadas en total</div></div>
+          <div class="stat-card"><div class="s-label">Textos editados</div><div class="s-value" id="statTexts">—</div><div class="s-sub">campos personalizados</div></div>
+          <div class="stat-card"><div class="s-label">Estado</div><div class="s-value" style="font-size:1.1rem;color:var(--g600)">● En línea</div><div class="s-sub">Supabase conectado</div></div>
+        </div>
+        <div class="dash-grid">
+          <div class="dash-card">
+            <h3>Accesos rápidos</h3>
+            <div class="quick-item"><span class="qi-dot" style="background:#6db863"></span><span class="qi-text">Subir fotos a la galería</span><button class="btn btn-sm btn-outline" onclick="showPanel('galeria',document.querySelectorAll('.nav-item')[1])">Ir →</button></div>
+            <div class="quick-item"><span class="qi-dot" style="background:#4e9a44"></span><span class="qi-text">Publicar nueva actividad</span><button class="btn btn-sm btn-outline" onclick="showPanel('actividades',document.querySelectorAll('.nav-item')[2])">Ir →</button></div>
+            <div class="quick-item"><span class="qi-dot" style="background:#3d8035"></span><span class="qi-text">Editar textos del sitio</span><button class="btn btn-sm btn-outline" onclick="showPanel('textos',document.querySelectorAll('.nav-item')[3])">Ir →</button></div>
+          </div>
+          <div class="dash-card">
+            <h3>Cómo funciona</h3>
+            <div class="dash-tip"><strong>1. Edita</strong> desde este panel.<br/><strong>2. Los cambios</strong> se guardan en Supabase.<br/><strong>3. El sitio público</strong> los muestra al instante — sin exportar ni resubir nada.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GALERÍA -->
+      <div class="panel" id="panel-galeria">
+        <div class="panel-title">Galería de fotos</div>
+        <p class="panel-desc">Sube hasta 6 fotos. Se guardan en Supabase Storage y aparecen en el sitio en segundos.</p>
+        <div class="gal-grid" id="galGrid"></div>
+        <input type="file" id="galFileInput" accept="image/*" style="display:none"/>
+        <p class="gal-hint">💡 Las fotos se suben al servidor — cualquier visitante las verá al abrir el sitio.</p>
+      </div>
+
+      <!-- ACTIVIDADES -->
+      <div class="panel" id="panel-actividades">
+        <div class="act-form-card">
+          <h3>+ Nueva actividad</h3>
+          <div class="fg2">
+            <div class="field"><label>Título *</label><input id="fTitle" type="text" placeholder="Ej: Taller de lectura en el colegio San Blas"/></div>
+            <div class="field"><label>Categoría</label>
+              <select id="fCat">
+                <option value="taller">Taller</option>
+                <option value="docentes">Docentes</option>
+                <option value="biblioteca">Biblioteca</option>
+                <option value="evento">Evento</option>
+              </select>
+            </div>
+          </div>
+          <div class="fg2">
+            <div class="field"><label>Fecha</label><input id="fDate" type="text" placeholder="Ej: Junio 2025"/></div>
+            <div class="field"><label>Autor / Voluntario</label><input id="fAuthor" type="text" placeholder="Nombre completo"/></div>
+          </div>
+          <div class="field"><label>Descripción</label><textarea id="fDesc" placeholder="Describe brevemente qué ocurrió..."></textarea></div>
+          <button class="btn btn-primary" id="addActBtn" onclick="addActivity()">+ Publicar actividad</button>
+        </div>
+        <div class="act-list-wrap">
+          <div class="act-list-header"><h3>Actividades publicadas</h3><span id="actCount" style="font-size:.8rem;color:var(--text-light)"></span></div>
+          <div class="act-list-body" id="actListBody"><div class="act-empty">Cargando...</div></div>
+        </div>
+      </div>
+
+      <!-- TEXTOS -->
+      <div class="panel" id="panel-textos">
+        <div class="panel-title">Editar textos</div>
+        <p class="panel-desc">Modifica los textos del sitio. Los cambios aparecen al instante para todos los visitantes.</p>
+        <div class="txt-section">
+          <h3>🌟 Sección Hero</h3>
+          <div class="fg2">
+            <div class="field"><label>Título principal</label><input id="tHeroTitle" type="text"/></div>
+            <div class="field"><label>Texto en cursiva verde</label><input id="tHeroAccent" type="text"/></div>
+          </div>
+          <div class="field"><label>Descripción</label><textarea id="tHeroDesc"></textarea></div>
+        </div>
+        <div class="txt-section">
+          <h3>👥 Nosotros</h3>
+          <div class="field"><label>Párrafo 1</label><textarea id="tAbout1"></textarea></div>
+          <div class="field"><label>Párrafo 2</label><textarea id="tAbout2"></textarea></div>
+          <div class="field"><label>Cita destacada</label><textarea id="tQuote" rows="2"></textarea></div>
+        </div>
+        <div class="txt-section">
+          <h3>📧 Contacto y redes</h3>
+          <div class="fg2">
+            <div class="field"><label>Correo</label><input id="tEmail" type="email"/></div>
+            <div class="field"><label>Instagram URL</label><input id="tInstagram" type="url"/></div>
+          </div>
+          <div class="fg2">
+            <div class="field"><label>Facebook URL</label><input id="tFacebook" type="url"/></div>
+            <div class="field"><label>WhatsApp URL</label><input id="tWhatsapp" type="url"/></div>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="saveTextsBtn" onclick="saveTexts()">✓ Guardar todos los cambios</button>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /adminApp -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════
+   SUPABASE CONFIG — mismas credenciales que index.html
+══════════════════════════════════════════════ */
+const SUPA_URL = 'https://TU_PROYECTO.supabase.co';
+const SUPA_KEY = 'TU_ANON_PUBLIC_KEY';
+const db = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+const CAT_COLOR = {taller:'#2d6b2a',docentes:'#4e9a44',biblioteca:'#3d8035',evento:'#1a4d1a'};
+const CAT_LABEL = {taller:'Taller',docentes:'Docentes',biblioteca:'Biblioteca',evento:'Evento'};
+const CONTENT_KEYS = ['heroTitle','heroAccent','heroDesc','about1','about2','quote','email','instagram','facebook','whatsapp'];
+
+let currentGalSlot = -1;
+
+/* ── LOGIN ── */
+['loginEmail','loginPw'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+});
+
+async function doLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw    = document.getElementById('loginPw').value;
+  const btn   = document.getElementById('loginBtn');
+  const err   = document.getElementById('loginError');
+  if(!email||!pw){ showLoginError('Completa todos los campos.'); return; }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Verificando...';
+  err.style.display = 'none';
+  const { data, error } = await db.auth.signInWithPassword({ email, password: pw });
+  if(error){
+    showLoginError('Credenciales incorrectas. Verifica tu correo y contraseña.');
+    btn.disabled = false; btn.textContent = 'Acceder al panel →';
+  } else {
+    const u = data.user;
+    document.getElementById('userAvatar').textContent = (u.email||'A').charAt(0).toUpperCase();
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminApp').classList.add('visible');
+    initApp();
+  }
+}
+
+function showLoginError(msg){
+  const el = document.getElementById('loginError');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+async function doLogout(){
+  await db.auth.signOut();
+  document.getElementById('adminApp').classList.remove('visible');
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginPw').value = '';
+  document.getElementById('loginError').style.display = 'none';
+  document.getElementById('loginBtn').disabled = false;
+  document.getElementById('loginBtn').textContent = 'Acceder al panel →';
+}
+
+/* ── NAVIGATION ── */
+const PANEL_TITLES = {dashboard:'Dashboard',galeria:'Galería',actividades:'Actividades',textos:'Textos'};
+
+function showPanel(id, navEl){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  if(navEl) navEl.classList.add('active');
+  document.getElementById('topbarTitle').textContent = PANEL_TITLES[id]||id;
+}
+
+/* ── INIT ── */
+async function initApp(){
+  await Promise.all([initGallery(), loadActivities(), loadTexts()]);
+  updateStats();
+}
+
+/* ── GALLERY ── */
+async function initGallery(){
+  const { data: rows } = await db.from('gallery').select('*').order('slot_index');
+  const map = {};
+  (rows||[]).forEach(r => map[r.slot_index] = r);
+
+  const grid = document.getElementById('galGrid');
+  grid.innerHTML = '';
+  for(let i=0;i<6;i++){
+    const item = map[i] || { slot_index:i, image_url:null, label:'' };
+    const slot = document.createElement('div');
+    slot.className = 'gal-slot' + (item.image_url ? ' filled' : '');
+    slot.dataset.slot = i;
+    slot.innerHTML = `
+      <img src="${item.image_url||''}" alt=""/>
+      <div class="gal-ph"><span class="gal-ph-icon">📷</span><p>Clic para subir foto</p></div>
+      <div class="gal-spinner"><span class="spinner"></span> Subiendo...</div>
+      <div class="gal-lbl"><input type="text" value="${item.label||''}" placeholder="Descripción..." data-slot="${i}"/></div>
+      <button class="gal-rm" data-slot="${i}" title="Quitar foto">✕</button>
+    `;
+    slot.addEventListener('click', function(e){
+      if(e.target.tagName==='INPUT'||e.target.classList.contains('gal-rm')) return;
+      currentGalSlot = i;
+      document.getElementById('galFileInput').click();
+    });
+    grid.appendChild(slot);
+  }
+
+  grid.querySelectorAll('.gal-lbl input').forEach(inp=>{
+    let t;
+    inp.addEventListener('input', function(){
+      clearTimeout(t);
+      const idx = parseInt(this.dataset.slot);
+      const val = this.value;
+      t = setTimeout(async ()=>{
+        await db.from('gallery').upsert({ slot_index: idx, label: val });
+        toast('💾 Descripción guardada');
+      }, 800);
+    });
+  });
+
+  grid.querySelectorAll('.gal-rm').forEach(btn=>{
+    btn.addEventListener('click', async function(e){
+      e.stopPropagation();
+      const idx = parseInt(this.dataset.slot);
+      // Delete from storage
+      await db.storage.from('gallery').remove([`slot-${idx}`]);
+      // Update DB
+      await db.from('gallery').upsert({ slot_index: idx, image_url: null, label: '' });
+      toast('🗑 Foto eliminada');
+      initGallery();
+      updateStats();
+    });
+  });
+}
+
+document.getElementById('galFileInput').addEventListener('change', async function(){
+  if(!this.files[0] || currentGalSlot < 0) return;
+  const file = this.files[0];
+  const idx  = currentGalSlot;
+  const slot = document.querySelector(`.gal-slot[data-slot="${idx}"]`);
+
+  // Compress image
+  const compressed = await compressImage(file, 900, 0.82);
+
+  slot.classList.add('uploading');
+
+  // Upload to Supabase Storage
+  const path = `slot-${idx}`;
+  const { error: upErr } = await db.storage.from('gallery').upload(path, compressed, {
+    contentType: 'image/jpeg', upsert: true
+  });
+
+  if(upErr){ toast('⚠️ Error al subir: '+upErr.message,'#dc2626'); slot.classList.remove('uploading'); return; }
+
+  const { data: urlData } = db.storage.from('gallery').getPublicUrl(path);
+  const publicUrl = urlData.publicUrl + '?t=' + Date.now(); // cache bust
+
+  // Get current label
+  const labelInput = slot.querySelector('.gal-lbl input');
+  const label = labelInput?.value || '';
+
+  await db.from('gallery').upsert({ slot_index: idx, image_url: urlData.publicUrl, label });
+
+  slot.classList.remove('uploading');
+  toast('✅ Foto publicada en el sitio');
+  initGallery();
+  updateStats();
+  this.value = '';
+});
+
+function compressImage(file, maxPx, quality){
+  return new Promise(resolve=>{
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = ()=>{
+      URL.revokeObjectURL(url);
+      let w=img.width, h=img.height;
+      if(w>maxPx||h>maxPx){ const r=Math.min(maxPx/w,maxPx/h); w=Math.round(w*r); h=Math.round(h*r); }
+      const canvas=document.createElement('canvas');
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      canvas.toBlob(blob=>resolve(blob),'image/jpeg',quality);
+    };
+    img.src=url;
+  });
+}
+
+/* ── ACTIVITIES ── */
+async function loadActivities(){
+  const { data: acts } = await db.from('activities').select('*').order('created_at',{ascending:false});
+  renderActList(acts||[]);
+}
+
+function renderActList(acts){
+  const body = document.getElementById('actListBody');
+  document.getElementById('actCount').textContent = acts.length + ' total';
+  if(!acts.length){ body.innerHTML='<div class="act-empty">No hay actividades aún. ¡Publica la primera!</div>'; return; }
+  body.innerHTML='';
+  acts.forEach(act=>{
+    const row = document.createElement('div');
+    row.className = 'act-row';
+    row.innerHTML = `
+      <span class="act-row-cat" style="background:${CAT_COLOR[act.cat]||'#2d6b2a'}">${CAT_LABEL[act.cat]||act.cat}</span>
+      <div class="act-row-info">
+        <strong>${act.title}</strong>
+        <span>${[act.date, act.author].filter(Boolean).join(' · ')}</span>
+      </div>
+      ${act.is_orig
+        ? '<span class="act-row-badge">Original</span>'
+        : `<button class="act-row-del" data-id="${act.id}" title="Eliminar">✕</button>`
+      }
+    `;
+    body.appendChild(row);
+  });
+  body.querySelectorAll('.act-row-del').forEach(btn=>{
+    btn.addEventListener('click', async function(){
+      if(!confirm('¿Eliminar esta actividad del sitio?')) return;
+      const { error } = await db.from('activities').delete().eq('id', this.dataset.id);
+      if(error){ toast('⚠️ '+error.message,'#dc2626'); return; }
+      toast('🗑 Actividad eliminada del sitio');
+      loadActivities(); updateStats();
+    });
+  });
+}
+
+async function addActivity(){
+  const title  = document.getElementById('fTitle').value.trim();
+  const cat    = document.getElementById('fCat').value;
+  const date   = document.getElementById('fDate').value.trim();
+  const author = document.getElementById('fAuthor').value.trim();
+  const desc   = document.getElementById('fDesc').value.trim();
+  if(!title){ toast('⚠️ El título es obligatorio','#dc2626'); return; }
+
+  const btn = document.getElementById('addActBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Publicando...';
+
+  const { error } = await db.from('activities').insert({ title, cat, date, author, description:desc, is_orig:false });
+
+  btn.disabled = false; btn.innerHTML = '+ Publicar actividad';
+
+  if(error){ toast('⚠️ '+error.message,'#dc2626'); return; }
+
+  ['fTitle','fDate','fAuthor','fDesc'].forEach(id=>document.getElementById(id).value='');
+  toast('✅ Actividad publicada en el sitio');
+  loadActivities(); updateStats();
+}
+
+/* ── TEXTS ── */
+async function loadTexts(){
+  const { data: rows } = await db.from('content').select('*');
+  if(!rows) return;
+  const map = {};
+  rows.forEach(r => map[r.key] = r.value);
+  CONTENT_KEYS.forEach(key=>{
+    const el = document.getElementById('t'+key.charAt(0).toUpperCase()+key.slice(1));
+    if(el && map[key] !== undefined) el.value = map[key];
+  });
+}
+
+async function saveTexts(){
+  const btn = document.getElementById('saveTextsBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Guardando...';
+
+  const rows = CONTENT_KEYS.map(key=>{
+    const id = 't'+key.charAt(0).toUpperCase()+key.slice(1);
+    const el = document.getElementById(id);
+    return { key, value: el?.value?.trim()||'' };
+  });
+
+  const { error } = await db.from('content').upsert(rows, { onConflict: 'key' });
+
+  btn.disabled = false; btn.innerHTML = '✓ Guardar todos los cambios';
+
+  if(error){ toast('⚠️ '+error.message,'#dc2626'); return; }
+  toast('✅ Textos guardados y visibles en el sitio');
+  updateStats();
+}
+
+/* ── STATS ── */
+async function updateStats(){
+  const [{ count: galCount }, { count: actCount }, { count: txtCount }] = await Promise.all([
+    db.from('gallery').select('*',{count:'exact',head:true}).not('image_url','is',null),
+    db.from('activities').select('*',{count:'exact',head:true}),
+    db.from('content').select('*',{count:'exact',head:true}),
+  ]);
+  document.getElementById('statFotos').textContent = galCount ?? '—';
+  document.getElementById('statActs').textContent  = actCount ?? '—';
+  document.getElementById('statTexts').textContent = txtCount ?? '—';
+}
+
+/* ── TOAST ── */
+let toastTimer;
+function toast(msg, bg){
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.style.background = bg||'var(--g800)';
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.classList.remove('show'), 3200);
+}
+
+/* ── AUTO-LOGIN si ya hay sesión ── */
+db.auth.getSession().then(({ data:{ session } })=>{
+  if(session){
+    const u = session.user;
+    document.getElementById('userAvatar').textContent = (u.email||'A').charAt(0).toUpperCase();
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminApp').classList.add('visible');
+    initApp();
+  }
+});
+</script>
+</body>
+</html>

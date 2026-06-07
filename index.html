@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PAQARINKAMA — Mediadores de Lectura</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+:root {
+  --g900: #0d2b0d; --g800: #1a4d1a; --g700: #2d6b2a; --g600: #3d8035;
+  --g500: #4e9a44; --g400: #6db863; --g300: #95d08c; --g200: #bfe8ba;
+  --g100: #dff2dc; --g50: #f0faf0; --cream: #f7f9f2; --white: #ffffff;
+  --text: #1a2d1a; --text-mid: #3d5c3a; --text-light: #6b8b68;
+  --border: #d0e6cc; --shadow: rgba(45,107,42,0.12); --shadow-deep: rgba(13,43,13,0.2);
+  --radius-sm:8px; --radius-md:14px; --radius-lg:20px; --radius-xl:28px; --radius-full:9999px;
+  --font-display:'Playfair Display',Georgia,serif; --font-sans:'Inter',system-ui,sans-serif;
+  --transition:0.28s ease; --transition-slow:0.6s cubic-bezier(0.16,1,0.3,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);color:var(--text);background:var(--cream);overflow-x:hidden;line-height:1.6}
+a{text-decoration:none;color:inherit} ul{list-style:none}
+input,select,textarea,button{font-family:inherit} button{cursor:pointer;border:none;background:none}
+::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:var(--g50)}
+::-webkit-scrollbar-thumb{background:var(--g400);border-radius:3px}
+
+.container{max-width:1180px;margin:0 auto;padding:0 24px}
+.text-green{color:var(--g600)} .text-white{color:var(--white)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:var(--radius-full);font-weight:600;font-size:0.93rem;transition:var(--transition);white-space:nowrap}
+.btn-primary{background:var(--g600);color:var(--white);box-shadow:0 4px 18px rgba(61,128,53,0.28)}
+.btn-primary:hover{background:var(--g700);transform:translateY(-2px);box-shadow:0 6px 24px rgba(61,128,53,0.36)}
+.btn-ghost{background:rgba(255,255,255,0.14);color:var(--white);border:2px solid rgba(255,255,255,0.38);backdrop-filter:blur(8px)}
+.btn-ghost:hover{background:rgba(255,255,255,0.24);transform:translateY(-2px)}
+.btn-outline-green{background:transparent;color:var(--g600);border:2px solid var(--g500)}
+.btn-outline-green:hover{background:var(--g600);color:var(--white)}
+.btn-full{width:100%;justify-content:center}
+.section-tag{display:inline-flex;align-items:center;gap:6px;background:var(--g100);color:var(--g700);padding:5px 14px;border-radius:var(--radius-full);font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:14px}
+.section-title{font-family:var(--font-display);font-size:clamp(1.9rem,3.5vw,2.8rem);font-weight:700;line-height:1.2;color:var(--text);margin-bottom:14px}
+.section-desc{color:var(--text-mid);font-size:1.02rem;line-height:1.7}
+.section-header{text-align:center;max-width:600px;margin:0 auto 52px}
+[data-reveal]{opacity:0;transform:translateY(28px);transition:opacity 0.65s var(--transition-slow),transform 0.65s var(--transition-slow)}
+[data-reveal="left"]{transform:translateX(-28px)} [data-reveal="right"]{transform:translateX(28px)}
+[data-reveal].revealed{opacity:1;transform:translate(0)}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:16px 0;transition:var(--transition)}
+.nav.scrolled{background:rgba(247,249,242,0.96);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);box-shadow:0 2px 20px var(--shadow);padding:11px 0}
+.nav-inner{max-width:1180px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.nav-logo{display:flex;align-items:center;gap:9px;font-family:var(--font-display);font-weight:700;font-size:1.15rem;color:var(--white);transition:var(--transition);letter-spacing:0.05em}
+.nav.scrolled .nav-logo{color:var(--g800)} .logo-leaf{font-size:1.3rem}
+.nav-links{display:flex;align-items:center;gap:4px}
+.nav-links a{padding:7px 14px;border-radius:var(--radius-full);font-size:0.9rem;font-weight:500;color:rgba(255,255,255,0.88);transition:var(--transition)}
+.nav.scrolled .nav-links a{color:var(--text-mid)}
+.nav-links a:hover{background:rgba(255,255,255,0.15);color:var(--white)}
+.nav.scrolled .nav-links a:hover{background:var(--g100);color:var(--g700)}
+.nav-toggle{display:none;flex-direction:column;gap:5px;padding:8px}
+.nav-toggle span{display:block;width:22px;height:2px;background:var(--white);border-radius:2px;transition:var(--transition)}
+.nav.scrolled .nav-toggle span{background:var(--g700)}
+
+/* HERO */
+.hero{min-height:88vh;background:linear-gradient(140deg,var(--g800) 0%,var(--g700) 45%,var(--g600) 80%,var(--g500) 100%);position:relative;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:120px 80px 80px;overflow:hidden}
+.hero-bg{position:absolute;inset:0;pointer-events:none}
+.hero-circle{position:absolute;border-radius:50%;filter:blur(70px)}
+.c1{width:560px;height:560px;background:radial-gradient(circle,rgba(109,184,99,0.2) 0%,transparent 70%);top:-180px;right:-80px;animation:floatBig 9s ease-in-out infinite}
+.c2{width:380px;height:380px;background:radial-gradient(circle,rgba(149,208,140,0.12) 0%,transparent 70%);bottom:-100px;left:60px;animation:floatBig 11s ease-in-out infinite reverse}
+@keyframes floatBig{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-28px) scale(1.04)}}
+.hero-content{position:relative;z-index:2;max-width:640px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.14);backdrop-filter:blur(10px);color:var(--g100);padding:7px 16px;border-radius:var(--radius-full);font-size:0.82rem;font-weight:500;letter-spacing:0.04em;margin-bottom:22px;border:1px solid rgba(255,255,255,0.18)}
+.badge-dot{width:7px;height:7px;border-radius:50%;background:var(--g300);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.75)}}
+.hero-title{font-family:var(--font-display);font-size:clamp(2.4rem,5vw,3.8rem);font-weight:900;color:var(--white);line-height:1.1;margin-bottom:22px}
+.hero-accent{color:var(--g300);font-style:italic;display:block}
+.hero-desc{color:rgba(255,255,255,0.82);font-size:1.08rem;line-height:1.78;margin-bottom:34px;max-width:500px}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap}
+.hero-scroll{position:absolute;bottom:28px;left:80px;display:flex;align-items:center;gap:10px;color:rgba(255,255,255,0.5);font-size:0.78rem;letter-spacing:0.05em;animation:bounceScroll 2.2s ease-in-out infinite}
+.hero-scroll svg{stroke:rgba(255,255,255,0.5)}
+@keyframes bounceScroll{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
+
+/* ABOUT */
+.about{padding:96px 0;background:var(--white)}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start}
+.about-text .section-title{margin-bottom:18px}
+.about-text p{color:var(--text-mid);line-height:1.8;margin-bottom:14px}
+.about-text strong{color:var(--text)}
+.about-pillars{display:flex;flex-direction:column;gap:12px;margin-top:28px}
+.pillar{display:flex;align-items:flex-start;gap:14px;background:var(--cream);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 18px;transition:var(--transition)}
+.pillar:hover{background:var(--g50);border-color:var(--g300);transform:translateX(4px)}
+.pillar-icon{font-size:1.4rem;flex-shrink:0}
+.pillar strong{display:block;font-size:0.93rem;margin-bottom:1px}
+.pillar p{font-size:0.83rem;color:var(--text-mid)}
+.about-big-quote{background:linear-gradient(135deg,var(--g700),var(--g800));border-radius:var(--radius-xl);padding:36px 32px;color:var(--white);margin-bottom:20px;box-shadow:0 12px 48px var(--shadow-deep)}
+.abq-mark{font-family:var(--font-display);font-size:4rem;color:var(--g300);line-height:0.8;display:block;margin-bottom:12px}
+.abq-text{font-family:var(--font-display);font-style:italic;font-size:1.2rem;line-height:1.6;color:rgba(255,255,255,0.92);margin-bottom:20px}
+.abq-author{display:flex;align-items:center;gap:10px;font-size:0.85rem;color:var(--g200)}
+.abq-dot{width:20px;height:2px;background:var(--g300);border-radius:1px}
+.about-tag-cloud{display:flex;flex-wrap:wrap;gap:8px}
+.atag{background:var(--g50);color:var(--g700);border:1px solid var(--g200);border-radius:var(--radius-full);padding:6px 14px;font-size:0.82rem;font-weight:500;transition:var(--transition)}
+.atag:hover{background:var(--g100);border-color:var(--g400)}
+
+/* ACTIVITIES */
+.activities{padding:96px 0;background:var(--cream)}
+.act-filters{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:40px}
+.act-filter{padding:8px 20px;border-radius:var(--radius-full);font-size:0.86rem;font-weight:600;background:var(--white);color:var(--text-mid);border:2px solid var(--border);transition:var(--transition)}
+.act-filter:hover{border-color:var(--g400);color:var(--g600)}
+.act-filter.active{background:var(--g600);color:var(--white);border-color:var(--g600)}
+.act-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.act-card{background:var(--white);border-radius:var(--radius-xl);border:1.5px solid var(--border);overflow:hidden;transition:var(--transition-slow)}
+.act-card:hover{transform:translateY(-6px);box-shadow:0 16px 50px var(--shadow);border-color:var(--g300)}
+.act-card-large{grid-column:span 2}
+.act-img{height:200px;position:relative;background-size:cover;background-position:center}
+.act-card-large .act-img{height:260px}
+.act-img-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,rgba(13,43,13,0.55))}
+.act-img-1{background-color:#2d6b2a;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,0.05) 0px,rgba(255,255,255,0.05) 2px,transparent 2px,transparent 14px)}
+.act-img-2{background-color:#3d8035;background-image:repeating-linear-gradient(-45deg,rgba(255,255,255,0.05) 0px,rgba(255,255,255,0.05) 2px,transparent 2px,transparent 14px)}
+.act-img-3{background-color:#4e9a44;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,0.05) 0px,rgba(255,255,255,0.05) 2px,transparent 2px,transparent 14px)}
+.act-img-4{background-color:#1a4d1a;background-image:repeating-linear-gradient(-45deg,rgba(255,255,255,0.05) 0px,rgba(255,255,255,0.05) 2px,transparent 2px,transparent 14px)}
+.act-img-5{background-color:#6db863;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,0.05) 0px,rgba(255,255,255,0.05) 2px,transparent 2px,transparent 14px)}
+.act-meta-top{position:absolute;bottom:12px;left:16px;right:16px;display:flex;align-items:center;justify-content:space-between}
+.act-cat{background:var(--g600);color:var(--white);font-size:0.73rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:4px 10px;border-radius:var(--radius-full)}
+.act-date{font-size:0.78rem;color:rgba(255,255,255,0.8);font-weight:500}
+.act-body{padding:22px 24px}
+.act-body h3{font-family:var(--font-display);font-size:1.08rem;font-weight:700;color:var(--text);line-height:1.35;margin-bottom:10px}
+.act-body p{font-size:0.87rem;color:var(--text-mid);line-height:1.7;margin-bottom:16px}
+.act-body em{color:var(--g600);font-style:italic}
+.act-footer{display:flex;align-items:center;justify-content:space-between}
+.act-author{display:flex;align-items:center;gap:8px}
+.act-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--g400),var(--g600));color:var(--white);font-size:0.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.act-author span{font-size:0.8rem;color:var(--text-mid)}
+.act-link{font-size:0.82rem;font-weight:600;color:var(--g600);transition:var(--transition)}
+.act-link:hover{color:var(--g700)}
+.act-more{margin-top:52px;text-align:center;background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius-xl);padding:36px 40px}
+.act-more p{color:var(--text-mid);margin-bottom:18px;font-size:0.95rem}
+.act-subscribe{display:flex;gap:10px;max-width:440px;margin:0 auto}
+.act-subscribe input{flex:1;padding:12px 16px;border:2px solid var(--border);border-radius:var(--radius-full);font-size:0.9rem;background:var(--cream);outline:none;color:var(--text);transition:var(--transition)}
+.act-subscribe input:focus{border-color:var(--g500);background:var(--white)}
+
+/* GALLERY */
+.gallery{padding:96px 0;background:var(--white)}
+.gallery-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:200px 200px;gap:12px;margin-bottom:32px}
+.gal-item{border-radius:var(--radius-lg);overflow:hidden;position:relative;cursor:pointer;background-size:cover;background-position:center;transition:var(--transition-slow)}
+.gal-item:hover{transform:scale(1.02);box-shadow:0 12px 40px var(--shadow-deep)}
+.gal-item:hover .gal-overlay{opacity:1}
+.gal-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(13,43,13,0.75) 0%,transparent 60%);opacity:0;transition:var(--transition);display:flex;align-items:flex-end;padding:16px}
+.gal-overlay span{color:var(--white);font-size:0.82rem;font-weight:600}
+.gal-tall{grid-row:span 2} .gal-wide{grid-column:span 2}
+.gal-1{background:linear-gradient(135deg,#1a4d1a 0%,#3d8035 100%)}
+.gal-2{background:linear-gradient(135deg,#2d6b2a 0%,#6db863 100%)}
+.gal-3{background:linear-gradient(135deg,#4e9a44 0%,#95d08c 100%)}
+.gal-4{background:linear-gradient(135deg,#0d2b0d 0%,#2d6b2a 100%)}
+.gal-5{background:linear-gradient(135deg,#3d8035 0%,#bfe8ba 100%)}
+.gal-6{background:linear-gradient(135deg,#6db863 0%,#dff2dc 100%)}
+.gal-item::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 30% 50%,rgba(255,255,255,0.06) 0%,transparent 60%);pointer-events:none}
+.gallery-cta{text-align:center}
+
+/* PROGRAMS */
+.programs{padding:96px 0;background:var(--cream)}
+.programs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.program-card{background:var(--white);border-radius:var(--radius-xl);padding:32px 28px;border:1.5px solid var(--border);transition:var(--transition-slow)}
+.program-card:hover{border-color:var(--g300);transform:translateY(-6px);box-shadow:0 16px 48px var(--shadow)}
+.program-card-featured{background:linear-gradient(155deg,var(--g700),var(--g800));border-color:var(--g600);box-shadow:0 8px 32px rgba(45,107,42,0.25)}
+.program-card-featured:hover{transform:translateY(-6px)}
+.program-card-featured h3{color:var(--white)} .program-card-featured p{color:rgba(255,255,255,0.82)}
+.pc-icon-wrap{width:56px;height:56px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:1.7rem;margin-bottom:16px}
+.pc-icon-1{background:linear-gradient(135deg,#dff5da,#b8e4b2)} .pc-icon-2{background:rgba(255,255,255,0.15)} .pc-icon-3{background:linear-gradient(135deg,#e8f5e1,#c8e6c0)}
+.pc-tag{display:inline-block;font-size:0.73rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;background:var(--g100);color:var(--g700);padding:3px 10px;border-radius:var(--radius-full);margin-bottom:12px}
+.pc-tag-light{background:rgba(255,255,255,0.18);color:var(--g200)}
+.program-card h3{font-family:var(--font-display);font-size:1.3rem;font-weight:700;color:var(--text);line-height:1.25;margin-bottom:12px}
+.program-card p{font-size:0.9rem;color:var(--text-mid);line-height:1.72}
+
+/* JOIN */
+.join{padding:96px 0;background:var(--white)}
+.join-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.join-card{border-radius:var(--radius-xl);padding:40px;border:1.5px solid var(--border)}
+.join-vol{background:var(--cream)} .join-donate{background:var(--g50);border-color:var(--g200)}
+.jc-icon{font-size:2.4rem;margin-bottom:12px}
+.join-card h3{font-family:var(--font-display);font-size:1.5rem;font-weight:700;color:var(--text);margin-bottom:10px}
+.join-card>p{font-size:0.9rem;color:var(--text-mid);line-height:1.7;margin-bottom:28px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.form-group label{font-size:0.82rem;font-weight:600;color:var(--text)}
+.form-group input,.form-group select,.form-group textarea{padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--radius-md);font-size:0.88rem;color:var(--text);background:var(--white);transition:var(--transition);outline:none;resize:none}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--g500);box-shadow:0 0 0 3px rgba(78,154,68,0.1)}
+.form-group input::placeholder,.form-group textarea::placeholder{color:var(--text-light)}
+.donate-options{display:flex;flex-direction:column;gap:12px;margin-bottom:24px}
+.donate-option{display:flex;align-items:flex-start;gap:14px;background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;transition:var(--transition)}
+.donate-option:hover{border-color:var(--g300);background:var(--g50)}
+.do-emoji{font-size:1.5rem;flex-shrink:0;margin-top:2px}
+.donate-option strong{display:block;font-size:0.9rem;color:var(--text);margin-bottom:2px}
+.donate-option p{font-size:0.82rem;color:var(--text-mid);line-height:1.5}
+
+/* FOOTER */
+.footer{background:var(--g900);color:var(--g200)}
+.footer-top{padding:64px 0 40px}
+.footer-grid{display:grid;grid-template-columns:1.5fr repeat(3,1fr);gap:36px}
+.footer-logo{display:flex;align-items:center;gap:9px;font-family:var(--font-display);font-size:1.15rem;font-weight:700;color:var(--white);margin-bottom:14px;letter-spacing:0.05em}
+.footer-brand p{font-size:0.86rem;color:var(--g300);line-height:1.7;margin-bottom:22px}
+.footer-social{display:flex;gap:8px}
+.soc-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);color:var(--g200);display:flex;align-items:center;justify-content:center;transition:var(--transition)}
+.soc-btn:hover{background:var(--g600);color:var(--white);border-color:var(--g600)}
+.footer-links-col h4{font-size:0.78rem;font-weight:700;color:var(--white);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px}
+.footer-links-col ul{display:flex;flex-direction:column;gap:9px}
+.footer-links-col a{font-size:0.86rem;color:var(--g300);transition:var(--transition)}
+.footer-links-col a:hover{color:var(--white);padding-left:3px}
+.footer-contact li{display:flex;align-items:center;gap:9px;font-size:0.86rem;color:var(--g300)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,0.07);padding:18px 0}
+.footer-bottom .container{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.footer-bottom p{font-size:0.8rem;color:var(--g400)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);z-index:2000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:var(--transition)}
+.modal-overlay.active{opacity:1;pointer-events:all}
+.modal-card{background:var(--white);border-radius:var(--radius-xl);padding:44px 36px;text-align:center;max-width:380px;width:90%;box-shadow:0 20px 70px rgba(0,0,0,0.25);transform:scale(0.9);transition:transform var(--transition-slow)}
+.modal-overlay.active .modal-card{transform:scale(1)}
+.modal-icon{font-size:2.8rem;margin-bottom:14px}
+.modal-card h3{font-family:var(--font-display);font-size:1.5rem;color:var(--text);margin-bottom:10px}
+.modal-card p{color:var(--text-mid);margin-bottom:24px;line-height:1.6;font-size:0.93rem}
+
+/* LEAF TRANSITION */
+.leaf-overlay{position:fixed;inset:0;z-index:9998;pointer-events:none;overflow:hidden;}
+.tleaf{position:absolute;top:0;will-change:transform,opacity;}
+
+/* ═══════════════════ ADMIN PANEL ═══════════════════ */
+.adm-pw-overlay{position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;}
+.adm-pw-overlay.open{display:flex;}
+.adm-pw-card{background:#fff;border-radius:20px;padding:40px 36px;text-align:center;width:min(360px,90vw);box-shadow:0 24px 64px rgba(0,0,0,0.3);}
+.adm-pw-card h3{font-family:var(--font-display);font-size:1.4rem;color:var(--text);margin-bottom:6px;}
+.adm-pw-card>p{font-size:0.85rem;color:var(--text-mid);margin-bottom:22px;}
+.adm-pw-input{width:100%;padding:12px 16px;border:2px solid var(--border);border-radius:10px;font-size:0.95rem;text-align:center;letter-spacing:0.1em;outline:none;margin-bottom:12px;transition:var(--transition);font-family:inherit;}
+.adm-pw-input:focus{border-color:var(--g500);}
+.adm-pw-error{color:#c44;font-size:0.8rem;margin-bottom:10px;display:none;}
+.adm-overlay{position:fixed;inset:0;z-index:10000;display:none;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:16px;}
+.adm-overlay.open{display:flex;}
+.adm-panel{background:#fff;width:min(860px,100%);max-height:92vh;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 32px 80px rgba(0,0,0,0.35);}
+.adm-header{background:linear-gradient(135deg,var(--g800),var(--g700));padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.adm-header-text h2{color:#fff;font-family:var(--font-display);font-size:1.1rem;font-weight:700;}
+.adm-header-text p{color:var(--g200);font-size:0.76rem;margin-top:2px;}
+.adm-close{color:rgba(255,255,255,0.7);font-size:1.5rem;line-height:1;padding:4px 8px;border-radius:6px;transition:var(--transition);}
+.adm-close:hover{color:#fff;background:rgba(255,255,255,0.15);}
+.adm-tabs{display:flex;border-bottom:2px solid var(--border);padding:0 20px;background:var(--cream);flex-shrink:0;overflow-x:auto;}
+.adm-tab{padding:13px 16px;font-size:0.86rem;font-weight:600;color:var(--text-mid);border:none;background:none;cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-2px;transition:var(--transition);white-space:nowrap;flex-shrink:0;}
+.adm-tab.active{color:var(--g600);border-bottom-color:var(--g600);}
+.adm-tab:hover{color:var(--g700);}
+.adm-body{overflow-y:auto;padding:24px 28px;flex:1;}
+.adm-pane{display:none;}
+.adm-pane.active{display:block;}
+.adm-stitle{font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--text);margin-bottom:4px;}
+.adm-sdesc{font-size:0.81rem;color:var(--text-mid);margin-bottom:18px;line-height:1.55;}
+/* gallery slots */
+.adm-gal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:8px;}
+.adm-gal-slot{aspect-ratio:4/3;border-radius:12px;overflow:hidden;position:relative;border:2px dashed var(--border);background:var(--g50);cursor:pointer;transition:var(--transition);}
+.adm-gal-slot:hover{border-color:var(--g400);background:var(--g100);}
+.adm-gal-slot.has-img{border-style:solid;border-color:var(--g300);}
+.adm-gal-slot img{width:100%;height:100%;object-fit:cover;display:none;}
+.adm-gal-slot.has-img img{display:block;}
+.adm-gal-ph{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:6px;color:var(--text-light);pointer-events:none;}
+.adm-gal-ph span{font-size:1.8rem;}
+.adm-gal-ph p{font-size:0.72rem;text-align:center;line-height:1.4;}
+.adm-gal-slot.has-img .adm-gal-ph{display:none;}
+.adm-gal-lbl{position:absolute;bottom:0;left:0;right:0;background:rgba(13,43,13,0.72);padding:5px 9px;}
+.adm-gal-lbl input{background:none;border:none;color:#fff;font-size:0.73rem;width:100%;outline:none;font-family:inherit;}
+.adm-gal-rm{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.55);color:#fff;font-size:0.85rem;display:none;align-items:center;justify-content:center;border:none;cursor:pointer;}
+.adm-gal-slot.has-img .adm-gal-rm{display:flex;}
+/* activity form */
+.adm-act-form{background:var(--cream);border:1.5px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:22px;}
+.adm-fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.adm-field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+.adm-field label{font-size:0.77rem;font-weight:600;color:var(--text);}
+.adm-field input,.adm-field select,.adm-field textarea{padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:0.85rem;color:var(--text);background:var(--white);outline:none;transition:var(--transition);resize:none;font-family:inherit;}
+.adm-field input:focus,.adm-field select:focus,.adm-field textarea:focus{border-color:var(--g500);box-shadow:0 0 0 3px rgba(78,154,68,0.1);}
+.adm-act-list{display:flex;flex-direction:column;gap:9px;}
+.adm-act-item{background:var(--white);border:1.5px solid var(--border);border-radius:11px;padding:12px 14px;display:flex;align-items:center;gap:12px;}
+.adm-act-cat{font-size:0.68rem;font-weight:700;text-transform:uppercase;padding:3px 8px;border-radius:20px;background:var(--g600);color:#fff;white-space:nowrap;flex-shrink:0;}
+.adm-act-info{flex:1;min-width:0;}
+.adm-act-info strong{display:block;font-size:0.86rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.adm-act-info span{font-size:0.76rem;color:var(--text-mid);}
+.adm-act-del{width:28px;height:28px;border-radius:50%;background:var(--g50);border:1.5px solid var(--border);color:var(--text-mid);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:0.85rem;transition:var(--transition);}
+.adm-act-del:hover{background:#fee2e2;border-color:#fca5a5;color:#dc2626;}
+/* text cards */
+.adm-txt-card{background:var(--cream);border:1.5px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:14px;}
+.adm-txt-card h4{font-size:0.76rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--g700);margin-bottom:14px;}
+/* export card */
+.adm-export-card{background:linear-gradient(135deg,var(--g800),var(--g700));border-radius:16px;padding:28px;text-align:center;color:#fff;margin-bottom:20px;}
+.adm-export-card h3{font-family:var(--font-display);font-size:1.3rem;margin-bottom:7px;}
+.adm-export-card p{color:var(--g200);font-size:0.86rem;line-height:1.6;margin-bottom:22px;}
+.adm-pw-box{background:var(--cream);border:1.5px solid var(--border);border-radius:14px;padding:20px;}
+.adm-pw-box h4{font-size:0.76rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--g700);margin-bottom:14px;}
+/* buttons */
+.adm-btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:20px;font-weight:600;font-size:0.86rem;cursor:pointer;border:none;transition:var(--transition);font-family:inherit;}
+.adm-btn-primary{background:var(--g600);color:#fff;}
+.adm-btn-primary:hover{background:var(--g700);}
+.adm-btn-white{background:#fff;color:var(--g700);border:2px solid rgba(255,255,255,0.4);}
+.adm-btn-white:hover{background:var(--g100);color:var(--g800);}
+.adm-btn-sm{padding:8px 14px;font-size:0.8rem;}
+.adm-hint{font-size:0.75rem;color:var(--text-light);margin-top:8px;line-height:1.5;}
+@media(max-width:600px){.adm-gal-grid{grid-template-columns:1fr 1fr;}.adm-fg2{grid-template-columns:1fr;}}
+/* RESPONSIVE */
+@media(max-width:1024px){
+  .hero{padding:100px 40px 64px}
+  .about-grid{grid-template-columns:1fr;gap:40px}
+  .programs-grid{grid-template-columns:1fr}
+  .act-grid{grid-template-columns:1fr 1fr}
+  .act-card-large{grid-column:span 2}
+  .gallery-grid{grid-template-columns:repeat(3,1fr);grid-template-rows:180px 180px}
+  .join-grid{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:768px){
+  .nav-links{display:none;flex-direction:column;position:absolute;top:100%;left:0;right:0;background:var(--white);padding:14px;gap:3px;box-shadow:0 8px 28px var(--shadow)}
+  .nav-links.open{display:flex}
+  .nav-links a{color:var(--text-mid)!important;padding:10px 14px;border-radius:var(--radius-md)}
+  .nav-toggle{display:flex}
+  .hero{padding:90px 24px 56px}
+  .act-grid{grid-template-columns:1fr}
+  .act-card-large{grid-column:span 1}
+  .gallery-grid{grid-template-columns:1fr 1fr;grid-template-rows:repeat(4,160px)}
+  .gal-tall{grid-row:span 1} .gal-wide{grid-column:span 2}
+  .footer-grid{grid-template-columns:1fr}
+  .footer-bottom .container{justify-content:center;text-align:center}
+  .act-subscribe{flex-direction:column}
+  .form-row{grid-template-columns:1fr}
+  .join-card{padding:28px 22px}
+}
+</style>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#inicio" class="nav-logo">
+        <span class="logo-leaf">🌿</span>
+        <span class="logo-text">PAQARINKAMA</span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Menú">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#nosotros">Nosotros</a></li>
+        <li><a href="#actividades">Actividades</a></li>
+        <li><a href="#galeria">Galería</a></li>
+        <li><a href="#programas">Programas</a></li>
+        <li><a href="#unete">Únete</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="hero" id="inicio">
+    <div class="hero-bg">
+      <div class="hero-circle c1"></div>
+      <div class="hero-circle c2"></div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-badge"><span class="badge-dot"></span>Cusco, Perú · Mediadores de lectura</div>
+      <h1 class="hero-title">Abrimos mundos<br/><span class="hero-accent">a través de la lectura</span></h1>
+      <p class="hero-desc">Somos una organización que promueve la democratización de la lectura mediante espacios accesibles y sostenibles — bibliotecas, talleres y comunidades que leen juntas.</p>
+      <div class="hero-actions">
+        <a href="#actividades" class="btn btn-primary">Ver nuestras actividades</a>
+        <a href="#nosotros" class="btn btn-ghost">Conocernos</a>
+      </div>
+    </div>
+    <div class="hero-scroll">
+      <span>Descubre más</span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    </div>
+  </section>
+
+  <section class="about" id="nosotros">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-text" data-reveal="left">
+          <div class="section-tag">¿Quiénes somos?</div>
+          <h2 class="section-title">Somos mediadores del <span class="text-green">amanecer lector</span></h2>
+          <p><strong>PAQARINKAMA</strong> — del quechua <em>"hasta que amanezca"</em> — es una organización de voluntarios, docentes y personas que aman los libros. Creemos que la lectura no es un privilegio: es un derecho.</p>
+          <p>Nuestro propósito es construir puentes entre los libros y las personas, fomentando el pensamiento crítico, la imaginación y el desarrollo integral en todas las etapas de la vida.</p>
+          <div class="about-pillars">
+            <div class="pillar"><span class="pillar-icon">🔓</span><div><strong>Acceso</strong><p>Lectura para todos, sin barreras</p></div></div>
+            <div class="pillar"><span class="pillar-icon">🧠</span><div><strong>Pensamiento crítico</strong><p>Lectores que cuestionan y crean</p></div></div>
+            <div class="pillar"><span class="pillar-icon">🤝</span><div><strong>Comunidad</strong><p>Espacios sostenibles y compartidos</p></div></div>
+          </div>
+        </div>
+        <div class="about-quote-wrap" data-reveal="right">
+          <div class="about-big-quote">
+            <span class="abq-mark">"</span>
+            <p class="abq-text">Queremos que cada persona, sin importar su historia, encuentre en un libro un mundo que le pertenezca.</p>
+            <div class="abq-author"><div class="abq-dot"></div><span>El equipo PAQARINKAMA</span></div>
+          </div>
+          <div class="about-tag-cloud">
+            <span class="atag">📖 Lectura en voz alta</span>
+            <span class="atag">🌱 Voluntariado</span>
+            <span class="atag">🏫 Escuelas</span>
+            <span class="atag">📚 Bibliotecas</span>
+            <span class="atag">👩‍🏫 Docentes</span>
+            <span class="atag">🧒 Niños</span>
+            <span class="atag">💚 Comunidad</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="activities" id="actividades">
+    <div class="container">
+      <div class="section-header" data-reveal="up">
+        <div class="section-tag">Lo que hacemos</div>
+        <h2 class="section-title">Nuestras <span class="text-green">actividades</span></h2>
+        <p class="section-desc">Aquí compartimos lo que vivimos — talleres, encuentros, momentos con libros y personas.</p>
+      </div>
+      <div class="act-filters" data-reveal="up">
+        <button class="act-filter active" data-filter="all">Todo</button>
+        <button class="act-filter" data-filter="taller">Talleres</button>
+        <button class="act-filter" data-filter="docentes">Docentes</button>
+        <button class="act-filter" data-filter="biblioteca">Bibliotecas</button>
+        <button class="act-filter" data-filter="evento">Eventos</button>
+      </div>
+      <div class="act-grid">
+        <article class="act-card act-card-large" data-category="taller" data-reveal="up" data-delay="0">
+          <div class="act-img act-img-1"><div class="act-img-overlay"></div><div class="act-meta-top"><span class="act-cat">Taller</span><span class="act-date">Mayo 2025</span></div></div>
+          <div class="act-body">
+            <h3>Primera sesión de lectura en voz alta en el colegio San Martín</h3>
+            <p>Comenzamos el año con mucha emoción. Los niños de 2.° grado escucharon por primera vez <em>"El pequeño príncipe"</em> leído en voz alta. Las preguntas que surgieron nos dejaron sin palabras.</p>
+            <div class="act-footer"><div class="act-author"><div class="act-avatar">L</div><span>Lucía Quispe, voluntaria</span></div><a href="#" class="act-link">Leer más →</a></div>
+          </div>
+        </article>
+        <article class="act-card" data-category="biblioteca" data-reveal="up" data-delay="100">
+          <div class="act-img act-img-2"><div class="act-img-overlay"></div><div class="act-meta-top"><span class="act-cat">Biblioteca</span><span class="act-date">Abril 2025</span></div></div>
+          <div class="act-body">
+            <h3>Inauguramos nuestra primera biblioteca de barrio</h3>
+            <p>Con 80 libros donados por familias del distrito, abrimos un pequeño rincón lector en el comedor comunitario de Ttío.</p>
+            <div class="act-footer"><div class="act-author"><div class="act-avatar">R</div><span>Rodrigo Mamani</span></div><a href="#" class="act-link">Leer más →</a></div>
+          </div>
+        </article>
+        <article class="act-card" data-category="docentes" data-reveal="up" data-delay="200">
+          <div class="act-img act-img-3"><div class="act-img-overlay"></div><div class="act-meta-top"><span class="act-cat">Docentes</span><span class="act-date">Marzo 2025</span></div></div>
+          <div class="act-body">
+            <h3>Taller de mediación lectora para maestros de inicial</h3>
+            <p>Doce docentes compartieron estrategias para leer con niños pequeños. Fue un encuentro cargado de experiencias y muchas risas.</p>
+            <div class="act-footer"><div class="act-author"><div class="act-avatar">S</div><span>Sofía Arredondo</span></div><a href="#" class="act-link">Leer más →</a></div>
+          </div>
+        </article>
+        <article class="act-card" data-category="evento" data-reveal="up" data-delay="300">
+          <div class="act-img act-img-4"><div class="act-img-overlay"></div><div class="act-meta-top"><span class="act-cat">Evento</span><span class="act-date">Feb 2025</span></div></div>
+          <div class="act-body">
+            <h3>Feria del libro usado: intercambio entre vecinos</h3>
+            <p>Más de 40 personas trajeron libros que ya no usaban y se llevaron otros. Un sábado de puro intercambio y conversación.</p>
+            <div class="act-footer"><div class="act-author"><div class="act-avatar">M</div><span>María Ccoa</span></div><a href="#" class="act-link">Leer más →</a></div>
+          </div>
+        </article>
+        <article class="act-card" data-category="taller" data-reveal="up" data-delay="400">
+          <div class="act-img act-img-5"><div class="act-img-overlay"></div><div class="act-meta-top"><span class="act-cat">Taller</span><span class="act-date">Enero 2025</span></div></div>
+          <div class="act-body">
+            <h3>Cuentos de verano: lectura bajo los árboles</h3>
+            <p>Aprovechamos el buen clima para hacer nuestra primera sesión al aire libre en el parque de Wanchaq. Vinieron familias enteras.</p>
+            <div class="act-footer"><div class="act-author"><div class="act-avatar">J</div><span>Javier Huanca</span></div><a href="#" class="act-link">Leer más →</a></div>
+          </div>
+        </article>
+      </div>
+      <div class="act-more" data-reveal="up">
+        <p>¿Quieres enterarte cuando publiquemos una nueva actividad?</p>
+        <form class="act-subscribe" id="subscribeForm">
+          <input type="email" placeholder="Tu correo electrónico" required />
+          <button type="submit" class="btn btn-primary">Suscribirme</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section class="gallery" id="galeria">
+    <div class="container">
+      <div class="section-header" data-reveal="up">
+        <div class="section-tag">Momentos</div>
+        <h2 class="section-title">Galería de <span class="text-green">recuerdos</span></h2>
+        <p class="section-desc">Cada foto es un momento real en el que alguien abrió un libro, escuchó una historia o compartió una lectura.</p>
+      </div>
+      <div class="gallery-grid" data-reveal="up">
+        <div class="gal-item gal-tall gal-1"><div class="gal-overlay"><span>📢 Lectura en voz alta</span></div></div>
+        <div class="gal-item gal-2"><div class="gal-overlay"><span>📚 Biblioteca Ttío</span></div></div>
+        <div class="gal-item gal-3"><div class="gal-overlay"><span>👩‍🏫 Taller docentes</span></div></div>
+        <div class="gal-item gal-wide gal-4"><div class="gal-overlay"><span>📖 Feria del libro</span></div></div>
+        <div class="gal-item gal-5"><div class="gal-overlay"><span>🌳 Lectura al aire libre</span></div></div>
+        <div class="gal-item gal-6"><div class="gal-overlay"><span>🧒 Niños lectores</span></div></div>
+      </div>
+      <div class="gallery-cta" data-reveal="up">
+        <a href="https://www.instagram.com" target="_blank" rel="noopener" class="btn btn-outline-green">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          Ver más en Instagram
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="programs" id="programas">
+    <div class="container">
+      <div class="section-header" data-reveal="up">
+        <div class="section-tag">Qué hacemos</div>
+        <h2 class="section-title">Nuestros <span class="text-green">programas</span></h2>
+        <p class="section-desc">Tres formas de acercar la lectura a quienes más lo necesitan.</p>
+      </div>
+      <div class="programs-grid">
+        <div class="program-card" data-reveal="up" data-delay="0">
+          <div class="pc-icon-wrap pc-icon-1"><span>📢</span></div>
+          <div class="pc-tag">Niños 4–12 años</div>
+          <h3>Taller de lectura<br/>en voz alta</h3>
+          <p>Leemos en voz alta con niños en colegios y espacios comunitarios. Buscamos que descubran el placer de escuchar, imaginar y preguntar.</p>
+        </div>
+        <div class="program-card program-card-featured" data-reveal="up" data-delay="150">
+          <div class="pc-icon-wrap pc-icon-2"><span>🎓</span></div>
+          <div class="pc-tag pc-tag-light">Maestros</div>
+          <h3>Formación<br/>docente</h3>
+          <p>Acompañamos a maestros para que se conviertan en mediadores de lectura: les compartimos estrategias, libros y una red de colegas que también leen.</p>
+        </div>
+        <div class="program-card" data-reveal="up" data-delay="300">
+          <div class="pc-icon-wrap pc-icon-3"><span>🏛️</span></div>
+          <div class="pc-tag">Comunidades</div>
+          <h3>Bibliotecas<br/>comunitarias</h3>
+          <p>Impulsamos pequeñas bibliotecas en hogares y espacios comunitarios. Donamos libros y orientamos a quienes quieren organizar su propia colección.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="join" id="unete">
+    <div class="container">
+      <div class="join-grid">
+        <div class="join-card join-vol" data-reveal="left">
+          <div class="jc-icon">🌱</div>
+          <h3>Sé voluntario</h3>
+          <p>No necesitas ser experto, solo tener ganas de compartir. Puedes ser lector voluntario, apoyar en comunicación, diseño o logística.</p>
+          <form class="join-form" id="volunteerForm">
+            <div class="form-group"><label>Tu nombre</label><input type="text" placeholder="Nombre completo" required /></div>
+            <div class="form-group"><label>Correo electrónico</label><input type="email" placeholder="tucorreo@ejemplo.com" required /></div>
+            <div class="form-group"><label>¿Cómo quieres colaborar?</label>
+              <select required>
+                <option value="" disabled selected>Elige una opción</option>
+                <option>Lector voluntario en talleres</option>
+                <option>Apoyo en formación docente</option>
+                <option>Diseño y redes sociales</option>
+                <option>Gestión de biblioteca</option>
+                <option>Otro</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">Quiero participar</button>
+          </form>
+        </div>
+        <div class="join-card join-donate" data-reveal="right">
+          <div class="jc-icon">📦</div>
+          <h3>Apoya la causa</h3>
+          <p>Puedes contribuir de varias formas. Cada aporte, grande o pequeño, ayuda a que más personas tengan acceso a la lectura.</p>
+          <div class="donate-options">
+            <div class="donate-option"><span class="do-emoji">📚</span><div><strong>Dona libros</strong><p>Libros que ya no uses pueden seguir viviendo en otras manos. Coordina con nosotros la entrega.</p></div></div>
+            <div class="donate-option"><span class="do-emoji">💚</span><div><strong>Donación económica</strong><p>Nos ayuda a costear materiales, transporte y actividades para los niños y docentes.</p></div></div>
+            <div class="donate-option"><span class="do-emoji">🏫</span><div><strong>Alianza institucional</strong><p>Si tienes un colegio, empresa u organización, podemos trabajar juntos.</p></div></div>
+          </div>
+          <form class="join-donate-form" id="donateForm">
+            <div class="form-row">
+              <div class="form-group"><label>Nombre</label><input type="text" placeholder="Tu nombre" /></div>
+              <div class="form-group"><label>Correo</label><input type="email" placeholder="tu@correo.com" /></div>
+            </div>
+            <div class="form-group"><label>Mensaje (opcional)</label><textarea rows="2" placeholder="¿Cómo quieres apoyarnos?"></textarea></div>
+            <button type="submit" class="btn btn-outline-green btn-full">Contactarnos</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-top">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <div class="footer-logo"><span class="logo-leaf">🌿</span><span>PAQARINKAMA</span></div>
+            <p>Mediadores de lectura comprometidos con la democratización del acceso a los libros y el desarrollo integral de las personas.</p>
+            <div class="footer-social">
+              <a href="#" class="soc-btn" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+              <a href="#" class="soc-btn" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+              <a href="#" class="soc-btn" aria-label="WhatsApp"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg></a>
+            </div>
+          </div>
+          <div class="footer-links-col"><h4>Explorar</h4><ul><li><a href="#nosotros">Quiénes somos</a></li><li><a href="#actividades">Actividades</a></li><li><a href="#galeria">Galería</a></li><li><a href="#programas">Programas</a></li></ul></div>
+          <div class="footer-links-col"><h4>Participar</h4><ul><li><a href="#unete">Ser voluntario</a></li><li><a href="#unete">Donar libros</a></li><li><a href="#unete">Alianzas</a></li></ul></div>
+          <div class="footer-links-col"><h4>Contacto</h4><ul class="footer-contact"><li><span>📧</span><a href="mailto:hola@paqarinkama.org">hola@paqarinkama.org</a></li><li><span>📍</span><span>Cusco, Perú</span></li><li><span>📱</span><a href="#">WhatsApp</a></li></ul></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container">
+        <p>© 2025 PAQARINKAMA · Todos los derechos reservados</p>
+        <p>Hecho con 💚 para democratizar la lectura en el Perú</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ══ ADMIN: PASSWORD PROMPT ══ -->
+  <div class="adm-pw-overlay" id="admPwOverlay">
+    <div class="adm-pw-card">
+      <div style="font-size:2.2rem;margin-bottom:10px">🔐</div>
+      <h3>Panel Administrador</h3>
+      <p>Ingresa la contraseña para acceder</p>
+      <input class="adm-pw-input" type="password" id="admPwInput" placeholder="Contraseña" autocomplete="off"/>
+      <p class="adm-pw-error" id="admPwError">Contraseña incorrecta. Inténtalo de nuevo.</p>
+      <button class="adm-btn adm-btn-primary" style="width:100%;justify-content:center" onclick="admCheckPw()">Entrar →</button>
+      <button onclick="document.getElementById('admPwOverlay').classList.remove('open')" style="display:block;margin:10px auto 0;font-size:0.82rem;color:var(--text-light);background:none;border:none;cursor:pointer">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- ══ ADMIN: MAIN PANEL ══ -->
+  <div class="adm-overlay" id="admOverlay">
+    <div class="adm-panel">
+      <div class="adm-header">
+        <div class="adm-header-text">
+          <h2>🌿 Panel Administrador — PAQARINKAMA</h2>
+          <p>Gestiona el contenido de tu plataforma · Clic logo ×5 para abrir</p>
+        </div>
+        <button class="adm-close" onclick="admClose()">✕</button>
+      </div>
+      <div class="adm-tabs">
+        <button class="adm-tab active" onclick="admTab(this,'galeria')">📷 Galería</button>
+        <button class="adm-tab" onclick="admTab(this,'actividades')">📋 Actividades</button>
+        <button class="adm-tab" onclick="admTab(this,'textos')">✏️ Textos</button>
+        <button class="adm-tab" onclick="admTab(this,'exportar')">⬇️ Exportar</button>
+      </div>
+      <div class="adm-body">
+
+        <!-- TAB GALERÍA -->
+        <div class="adm-pane active" id="admPane-galeria">
+          <p class="adm-stitle">Subir fotos a la galería</p>
+          <p class="adm-sdesc">Haz clic en cada recuadro para subir una foto desde tu computadora. Puedes editar la descripción que aparece al pasar el mouse. Las fotos se guardan al exportar el HTML.</p>
+          <div class="adm-gal-grid" id="admGalGrid"></div>
+          <input type="file" id="admGalInput" accept="image/*" style="display:none"/>
+          <p class="adm-hint">💡 Las imágenes se convierten a base64 y quedan embebidas en el archivo HTML. Funciona sin internet.</p>
+        </div>
+
+        <!-- TAB ACTIVIDADES -->
+        <div class="adm-pane" id="admPane-actividades">
+          <p class="adm-stitle">Publicar nueva actividad</p>
+          <p class="adm-sdesc">Completa el formulario para agregar una tarjeta nueva a la sección de actividades.</p>
+          <div class="adm-act-form">
+            <div class="adm-fg2">
+              <div class="adm-field"><label>Título de la actividad *</label><input id="actTitle" type="text" placeholder="Ej: Taller de lectura en Wanchaq"/></div>
+              <div class="adm-field"><label>Categoría</label>
+                <select id="actCat">
+                  <option value="taller">Taller</option>
+                  <option value="docentes">Docentes</option>
+                  <option value="biblioteca">Biblioteca</option>
+                  <option value="evento">Evento</option>
+                </select>
+              </div>
+            </div>
+            <div class="adm-fg2">
+              <div class="adm-field"><label>Fecha</label><input id="actDate" type="text" placeholder="Ej: Junio 2025"/></div>
+              <div class="adm-field"><label>Autor / Voluntario</label><input id="actAuthor" type="text" placeholder="Nombre del autor"/></div>
+            </div>
+            <div class="adm-field"><label>Descripción</label><textarea id="actDesc" rows="3" placeholder="Describe brevemente la actividad..."></textarea></div>
+            <button class="adm-btn adm-btn-primary" onclick="admAddActivity()">+ Publicar actividad</button>
+          </div>
+          <p class="adm-stitle">Actividades publicadas</p>
+          <div class="adm-act-list" id="admActList"></div>
+        </div>
+
+        <!-- TAB TEXTOS -->
+        <div class="adm-pane" id="admPane-textos">
+          <p class="adm-stitle">Editar textos principales</p>
+          <p class="adm-sdesc">Los cambios se aplican en tiempo real en la página. Haz clic en "Aplicar cambios" y luego exporta el HTML.</p>
+          <div class="adm-txt-card">
+            <h4>🌟 Sección Hero</h4>
+            <div class="adm-field"><label>Título principal</label><input type="text" id="txtHeroTitle" placeholder="Abrimos mundos"/></div>
+            <div class="adm-field"><label>Texto destacado (en cursiva verde)</label><input type="text" id="txtHeroAccent" placeholder="a través de la lectura"/></div>
+            <div class="adm-field"><label>Descripción</label><textarea id="txtHeroDesc" rows="3"></textarea></div>
+          </div>
+          <div class="adm-txt-card">
+            <h4>👥 Nosotros — Párrafos</h4>
+            <div class="adm-field"><label>Párrafo 1</label><textarea id="txtAbout1" rows="3"></textarea></div>
+            <div class="adm-field"><label>Párrafo 2</label><textarea id="txtAbout2" rows="3"></textarea></div>
+          </div>
+          <div class="adm-txt-card">
+            <h4>💬 Cita destacada</h4>
+            <div class="adm-field"><label>Texto de la cita</label><textarea id="txtQuote" rows="2"></textarea></div>
+          </div>
+          <div class="adm-txt-card">
+            <h4>📧 Contacto y redes</h4>
+            <div class="adm-field"><label>Correo electrónico</label><input type="email" id="txtEmail" placeholder="hola@paqarinkama.org"/></div>
+            <div class="adm-field"><label>Link de Instagram</label><input type="url" id="txtInstagram" placeholder="https://instagram.com/paqarinkama"/></div>
+            <div class="adm-field"><label>Link de Facebook</label><input type="url" id="txtFacebook" placeholder="https://facebook.com/paqarinkama"/></div>
+            <div class="adm-field"><label>Link de WhatsApp</label><input type="url" id="txtWhatsapp" placeholder="https://wa.me/51999999999"/></div>
+          </div>
+          <button class="adm-btn adm-btn-primary" onclick="admApplyTexts()">✓ Aplicar cambios</button>
+        </div>
+
+        <!-- TAB EXPORTAR -->
+        <div class="adm-pane" id="admPane-exportar">
+          <div class="adm-export-card">
+            <div style="font-size:2.4rem;margin-bottom:10px">📦</div>
+            <h3>Descargar versión actualizada</h3>
+            <p>Descarga el archivo HTML con todas tus fotos, actividades y textos guardados adentro. Ese archivo es el que compartes con colegas — sin necesidad de internet ni servidor.</p>
+            <button class="adm-btn adm-btn-white" onclick="admExport()">⬇️ Descargar PAQARINKAMA.html</button>
+          </div>
+          <div class="adm-pw-box">
+            <h4>🔑 Cambiar contraseña del panel</h4>
+            <div class="adm-fg2">
+              <div class="adm-field"><label>Nueva contraseña</label><input type="password" id="admNewPw" placeholder="Nueva contraseña"/></div>
+              <div class="adm-field"><label>Confirmar</label><input type="password" id="admNewPw2" placeholder="Repetir contraseña"/></div>
+            </div>
+            <button class="adm-btn adm-btn-primary adm-btn-sm" onclick="admChangePw()">Cambiar contraseña</button>
+            <p class="adm-hint">La nueva contraseña quedará guardada en el HTML exportado.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="successModal">
+    <div class="modal-card">
+      <div class="modal-icon">🌱</div>
+      <h3 id="modalTitle">¡Gracias!</h3>
+      <p id="modalDesc">Tu mensaje fue enviado. Nos pondremos en contacto pronto.</p>
+      <button class="btn btn-primary" id="modalClose">Cerrar</button>
+    </div>
+  </div>
+
+<script>
+/* ══════════════════════════════════════════════
+   SUPABASE CONFIG — reemplaza con tus credenciales
+   (las encuentras en tu proyecto → Settings → API)
+══════════════════════════════════════════════ */
+const SUPA_URL = 'https://TU_PROYECTO.supabase.co';
+const SUPA_KEY = 'TU_ANON_PUBLIC_KEY';
+const db = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+const CAT_COLOR={taller:'#2d6b2a',docentes:'#4e9a44',biblioteca:'#3d8035',evento:'#1a4d1a'};
+const CAT_LABEL={taller:'Taller',docentes:'Docentes',biblioteca:'Biblioteca',evento:'Evento'};
+
+async function loadFromSupabase(){
+  try{
+    /* ── 1. TEXTOS ── */
+    const {data:rows}=await db.from('content').select('*');
+    if(rows){
+      const c={};rows.forEach(r=>c[r.key]=r.value);
+      const ht=document.querySelector('.hero-title');
+      if(ht&&c.heroTitle) ht.innerHTML=c.heroTitle+'<br/><span class="hero-accent">'+(c.heroAccent||'a través de la lectura')+'</span>';
+      const hd=document.querySelector('.hero-desc');
+      if(hd&&c.heroDesc) hd.textContent=c.heroDesc;
+      const ap=document.querySelectorAll('.about-text > p');
+      if(ap[0]&&c.about1) ap[0].innerHTML=c.about1;
+      if(ap[1]&&c.about2) ap[1].innerHTML=c.about2;
+      const q=document.querySelector('.abq-text');
+      if(q&&c.quote) q.textContent=c.quote;
+      if(c.email) document.querySelectorAll('.footer-contact a[href^="mailto:"]').forEach(a=>{a.href='mailto:'+c.email;a.textContent=c.email;});
+      if(c.instagram){const a=document.querySelector('.gallery-cta a');if(a)a.href=c.instagram;}
+      if(c.facebook){const a=document.querySelector('.soc-btn[aria-label="Facebook"]');if(a)a.href=c.facebook;}
+      if(c.whatsapp){const a=document.querySelector('.soc-btn[aria-label="WhatsApp"]');if(a)a.href=c.whatsapp;}
+    }
+    /* ── 2. GALERÍA ── */
+    const {data:gallery}=await db.from('gallery').select('*').order('slot_index');
+    if(gallery) gallery.forEach(item=>{
+      const el=document.querySelectorAll('.gal-item')[item.slot_index];
+      if(!el) return;
+      if(item.image_url){el.style.backgroundImage='url('+item.image_url+')';el.style.backgroundSize='cover';el.style.backgroundPosition='center';}
+      const sp=el.querySelector('.gal-overlay span');
+      if(sp&&item.label) sp.textContent=item.label;
+    });
+    /* ── 3. ACTIVIDADES ── */
+    const {data:acts}=await db.from('activities').select('*').eq('is_orig',false).order('created_at',{ascending:false});
+    if(acts&&acts.length){
+      const grid=document.querySelector('.act-grid');
+      if(grid) acts.forEach(act=>{
+        const card=document.createElement('article');
+        card.className='act-card'; card.dataset.category=act.cat;
+        card.innerHTML='<div class="act-img" style="background-color:'+(CAT_COLOR[act.cat]||'#2d6b2a')+';background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 2px,transparent 2px,transparent 14px)"><div class="act-img-overlay"></div><div class="act-meta-top"><span class="act-cat">'+(CAT_LABEL[act.cat]||act.cat)+'</span><span class="act-date">'+(act.date||'')+'</span></div></div><div class="act-body"><h3>'+act.title+'</h3><p>'+(act.description||'')+'</p><div class="act-footer"><div class="act-author"><div class="act-avatar">'+((act.author||'P').charAt(0).toUpperCase())+'</div><span>'+(act.author||'Equipo PAQARINKAMA')+'</span></div><a href="#" class="act-link">Leer más →</a></div></div>';
+        grid.appendChild(card);
+      });
+    }
+  }catch(e){ console.warn('Supabase:', e.message); }
+}
+document.addEventListener('DOMContentLoaded', loadFromSupabase);
+
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',window.scrollY>40));
+const navToggle=document.getElementById('navToggle'),navLinks=document.getElementById('navLinks');
+navToggle.addEventListener('click',()=>navLinks.classList.toggle('open'));
+
+/* ── LEAF SWEEP — hojas animadas volando de derecha a izquierda ── */
+function leafCurtain(cb){
+  const W=window.innerWidth, H=window.innerHeight;
+  const palette=['#0d2b0d','#1a4d1a','#2d6b2a','#3d8035','#4e9a44','#6db863','#95d08c'];
+
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;z-index:9999;pointer-events:all;overflow:hidden;';
+
+  /* canvas del mismo tamaño que la pantalla */
+  const cvs=document.createElement('canvas');
+  cvs.width=W; cvs.height=H;
+  cvs.style.cssText='position:absolute;inset:0;';
+  const ctx=cvs.getContext('2d');
+  overlay.appendChild(cvs);
+  document.body.appendChild(overlay);
+
+  /* 260 hojas en banda compacta → barrido visual de ola */
+  const N=260;
+  const leaves=Array.from({length:N},()=>({
+    x:  W+50+Math.random()*160,           /* banda inicial estrecha: efecto de ola */
+    y:  Math.random()*(H+80)-40,
+    sz: 15+Math.random()*36,
+    vx: -(24+Math.random()*16),           /* velocidad horizontal: vuelan rápido */
+    vy: (Math.random()-0.5)*1.4,
+    rot:Math.random()*Math.PI*2,
+    vr: (Math.random()-0.5)*0.13,
+    wA: 0.8+Math.random()*2.4,            /* amplitud del aleteo vertical */
+    wF: 0.028+Math.random()*0.048,
+    t:  0,
+    col:palette[Math.floor(Math.random()*palette.length)]
+  }));
+
+  let bgAlpha=0, phase=0, cbFired=false;
+
+  /* dibuja una hoja como forma bezier */
+  function drawLeaf(x,y,sz,rot,col){
+    ctx.save();
+    ctx.translate(x,y); ctx.rotate(rot);
+    ctx.beginPath();
+    ctx.moveTo(0,-sz);
+    ctx.bezierCurveTo( sz*.62,-sz*.32, sz*.62, sz*.52, 0, sz*.88);
+    ctx.bezierCurveTo(-sz*.62, sz*.52,-sz*.62,-sz*.32, 0,-sz);
+    ctx.globalAlpha=0.86;
+    ctx.fillStyle=col; ctx.fill();
+    /* nervadura */
+    ctx.beginPath(); ctx.moveTo(0,-sz*.58); ctx.lineTo(0,sz*.68);
+    ctx.strokeStyle='rgba(149,208,140,0.32)';
+    ctx.lineWidth=sz*.058; ctx.lineCap='round'; ctx.stroke();
+    ctx.restore();
+  }
+
+  function tick(){
+    ctx.clearRect(0,0,W,H);
+
+    /* capa de cobertura semitransparente */
+    if(bgAlpha>0){
+      ctx.globalAlpha=bgAlpha;
+      ctx.fillStyle='#1a4d1a';
+      ctx.fillRect(0,0,W,H);
+      ctx.globalAlpha=1;
+    }
+
+    let onScreen=0, allGone=true;
+    leaves.forEach(lf=>{
+      lf.t++;
+      lf.x+=lf.vx;
+      lf.y+=lf.vy+Math.sin(lf.t*lf.wF)*lf.wA;
+      lf.rot+=lf.vr;
+      if(lf.x+lf.sz>0) allGone=false;
+      if(lf.x+lf.sz>0 && lf.x-lf.sz<W){
+        onScreen++;
+        drawLeaf(lf.x,lf.y,lf.sz,lf.rot,lf.col);
+      }
+    });
+
+    const pct=onScreen/N;
+
+    /* fase 0 → sube cobertura mientras la ola cubre la pantalla */
+    if(phase===0){
+      if(pct>0.38) bgAlpha=Math.min(0.9,bgAlpha+0.07);
+      if(bgAlpha>=0.9){ phase=1; if(!cbFired){cbFired=true; cb&&cb();} }
+    }
+    /* fase 1 → espera que la ola comience a salir */
+    else if(phase===1 && pct<0.5){ phase=2; }
+    /* fase 2 → baja cobertura mientras las hojas salen por la izquierda */
+    else if(phase===2){ bgAlpha=Math.max(0,bgAlpha-0.07); }
+
+    if(!allGone||bgAlpha>0) requestAnimationFrame(tick);
+    else overlay.remove();
+  }
+
+  requestAnimationFrame(tick);
+}
+
+document.querySelectorAll('.nav-links a').forEach(a=>{
+  a.addEventListener('click',(e)=>{
+    const href=a.getAttribute('href');
+    if(href&&href.startsWith('#')){
+      e.preventDefault();
+      navLinks.classList.remove('open');
+      leafCurtain(()=>{
+        const target=document.querySelector(href);
+        if(target) target.scrollIntoView({behavior:'instant'});
+      });
+    }
+  });
+});
+const revealObs=new IntersectionObserver((entries)=>{entries.forEach(entry=>{if(!entry.isIntersecting)return;const delay=Number(entry.target.dataset.delay||0);setTimeout(()=>entry.target.classList.add('revealed'),delay);revealObs.unobserve(entry.target);});},{threshold:0.1,rootMargin:'0px 0px -50px 0px'});
+document.querySelectorAll('[data-reveal]').forEach(el=>revealObs.observe(el));
+window.addEventListener('load',()=>{document.querySelectorAll('.hero-content > *').forEach((el,i)=>{el.style.cssText=`opacity:0;transform:translateY(20px);transition:opacity .6s ease ${i*0.1}s,transform .6s ease ${i*0.1}s`;requestAnimationFrame(()=>setTimeout(()=>{el.style.opacity='1';el.style.transform='translateY(0)';},80));});});
+const filters=document.querySelectorAll('.act-filter'),cards=document.querySelectorAll('.act-card');
+filters.forEach(btn=>{btn.addEventListener('click',()=>{filters.forEach(f=>f.classList.remove('active'));btn.classList.add('active');const filter=btn.dataset.filter;cards.forEach(card=>{const match=filter==='all'||card.dataset.category===filter;card.style.transition='opacity 0.3s ease,transform 0.3s ease';if(match){card.style.opacity='1';card.style.transform='';card.style.display='';}else{card.style.opacity='0';card.style.transform='scale(0.96)';setTimeout(()=>{card.style.display='none';},300);}});});});
+const modal=document.getElementById('successModal'),modalTitle=document.getElementById('modalTitle'),modalDesc=document.getElementById('modalDesc'),modalClose=document.getElementById('modalClose');
+function showModal(t,d){modalTitle.textContent=t;modalDesc.textContent=d;modal.classList.add('active');document.body.style.overflow='hidden';}
+function closeModal(){modal.classList.remove('active');document.body.style.overflow='';}
+modalClose.addEventListener('click',closeModal);
+modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});
+/* ══════════════════ ADMIN PANEL ══════════════════ */
+(function(){
+  let ADM_PW='paqari2025';
+
+  /* —— TRIGGER: clic en logo ×5 dentro de 2s —— */
+  let lc=0,lt;
+  document.querySelector('.nav-logo').addEventListener('click',function(e){
+    e.preventDefault(); lc++; clearTimeout(lt);
+    if(lc>=5){ lc=0; admOpenPw(); return; }
+    lt=setTimeout(()=>lc=0,2000);
+  });
+
+  function admOpenPw(){
+    document.getElementById('admPwOverlay').classList.add('open');
+    document.getElementById('admPwInput').value='';
+    document.getElementById('admPwError').style.display='none';
+    setTimeout(()=>document.getElementById('admPwInput').focus(),120);
+  }
+  document.getElementById('admPwInput').addEventListener('keydown',e=>{ if(e.key==='Enter') admCheckPw(); });
+
+  window.admCheckPw=function(){
+    if(document.getElementById('admPwInput').value===ADM_PW){
+      document.getElementById('admPwOverlay').classList.remove('open');
+      admOpen();
+    } else {
+      document.getElementById('admPwError').style.display='block';
+      document.getElementById('admPwInput').value='';
+      document.getElementById('admPwInput').focus();
+    }
+  };
+
+  function admOpen(){
+    document.getElementById('admOverlay').classList.add('open');
+    admInitGallery();
+    admInitTexts();
+    admRenderActList();
+  }
+  window.admClose=function(){ document.getElementById('admOverlay').classList.remove('open'); };
+  document.getElementById('admOverlay').addEventListener('click',function(e){ if(e.target===this) admClose(); });
+
+  window.admTab=function(btn,pane){
+    document.querySelectorAll('.adm-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.adm-pane').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('admPane-'+pane).classList.add('active');
+  };
+
+  /* —— GALERÍA —— */
+  const galDefaultLabels=['📢 Lectura en voz alta','📚 Biblioteca Ttío','👩‍🏫 Taller docentes','📖 Feria del libro','🌳 Lectura al aire libre','🧒 Niños lectores'];
+  let galImgs=Array(6).fill(null);
+  let galLabels=[...galDefaultLabels];
+  let currentSlot=-1;
+
+  function admInitGallery(){
+    const grid=document.getElementById('admGalGrid');
+    grid.innerHTML='';
+    for(let i=0;i<6;i++){
+      const slot=document.createElement('div');
+      slot.className='adm-gal-slot'+(galImgs[i]?' has-img':'');
+      slot.dataset.idx=i;
+      slot.innerHTML=`<img src="${galImgs[i]||''}" alt=""/>
+        <div class="adm-gal-ph"><span>📷</span><p>Clic para<br/>subir foto</p></div>
+        <div class="adm-gal-lbl"><input type="text" value="${galLabels[i]}" placeholder="Descripción..." data-slot="${i}"/></div>
+        <button class="adm-gal-rm" data-slot="${i}" title="Quitar">✕</button>`;
+      slot.addEventListener('click',function(e){
+        if(e.target.tagName==='INPUT'||e.target.classList.contains('adm-gal-rm')) return;
+        currentSlot=i; document.getElementById('admGalInput').click();
+      });
+      grid.appendChild(slot);
+    }
+    grid.querySelectorAll('.adm-gal-lbl input').forEach(inp=>{
+      inp.addEventListener('input',function(){
+        const idx=parseInt(this.dataset.slot);
+        galLabels[idx]=this.value;
+        const span=document.querySelectorAll('.gal-item')[idx]?.querySelector('.gal-overlay span');
+        if(span) span.textContent=this.value;
+      });
+    });
+    grid.querySelectorAll('.adm-gal-rm').forEach(btn=>{
+      btn.addEventListener('click',function(e){
+        e.stopPropagation();
+        const idx=parseInt(this.dataset.slot);
+        galImgs[idx]=null;
+        const gi=document.querySelectorAll('.gal-item')[idx];
+        if(gi){ gi.style.backgroundImage=''; }
+        admInitGallery();
+      });
+    });
+  }
+
+  document.getElementById('admGalInput').addEventListener('change',function(){
+    if(!this.files[0]||currentSlot<0) return;
+    const reader=new FileReader();
+    reader.onload=function(ev){
+      galImgs[currentSlot]=ev.target.result;
+      const gi=document.querySelectorAll('.gal-item')[currentSlot];
+      if(gi){ gi.style.backgroundImage=`url(${ev.target.result})`; gi.style.backgroundSize='cover'; gi.style.backgroundPosition='center'; }
+      admInitGallery();
+    };
+    reader.readAsDataURL(this.files[0]);
+    this.value='';
+  });
+
+  /* —— ACTIVIDADES —— */
+  let actList=[];
+  document.querySelectorAll('.act-card').forEach((card,i)=>{
+    actList.push({
+      id:'orig-'+i,
+      title:card.querySelector('h3')?.textContent||'',
+      cat:card.dataset.category||'taller',
+      date:card.querySelector('.act-date')?.textContent||'',
+      author:card.querySelector('.act-author span')?.textContent||'',
+      isOrig:true
+    });
+  });
+
+  const catLabel={taller:'Taller',docentes:'Docentes',biblioteca:'Biblioteca',evento:'Evento'};
+  const catColor={taller:'#2d6b2a',docentes:'#4e9a44',biblioteca:'#3d8035',evento:'#1a4d1a'};
+  const catPattern={taller:'45deg',docentes:'-45deg',biblioteca:'45deg',evento:'-45deg'};
+
+  window.admAddActivity=function(){
+    const title=document.getElementById('actTitle').value.trim();
+    const desc=document.getElementById('actDesc').value.trim();
+    const cat=document.getElementById('actCat').value;
+    const date=document.getElementById('actDate').value.trim();
+    const author=document.getElementById('actAuthor').value.trim();
+    if(!title){ alert('Por favor ingresa un título.'); return; }
+    const id='act-'+Date.now();
+    const card=document.createElement('article');
+    card.className='act-card'; card.dataset.category=cat; card.dataset.admId=id;
+    card.innerHTML=`<div class="act-img" style="background-color:${catColor[cat]};background-image:repeating-linear-gradient(${catPattern[cat]},rgba(255,255,255,0.05) 0px,rgba(255,255,255,0.05) 2px,transparent 2px,transparent 14px)">
+      <div class="act-img-overlay"></div>
+      <div class="act-meta-top"><span class="act-cat">${catLabel[cat]}</span><span class="act-date">${date||'2025'}</span></div>
+    </div>
+    <div class="act-body">
+      <h3>${title}</h3>
+      <p>${desc||''}</p>
+      <div class="act-footer">
+        <div class="act-author"><div class="act-avatar">${(author||'P').charAt(0).toUpperCase()}</div><span>${author||'Equipo PAQARINKAMA'}</span></div>
+        <a href="#" class="act-link">Leer más →</a>
+      </div>
+    </div>`;
+    document.querySelector('.act-grid').appendChild(card);
+    actList.push({id,title,cat,date,author,isOrig:false});
+    ['actTitle','actDate','actAuthor','actDesc'].forEach(fid=>document.getElementById(fid).value='');
+    admRenderActList();
+  };
+
+  function admRenderActList(){
+    const list=document.getElementById('admActList');
+    if(!list) return;
+    list.innerHTML='';
+    actList.forEach(act=>{
+      const item=document.createElement('div');
+      item.className='adm-act-item';
+      item.innerHTML=`<span class="adm-act-cat">${catLabel[act.cat]||act.cat}</span>
+        <div class="adm-act-info"><strong>${act.title}</strong><span>${[act.date,act.author].filter(Boolean).join(' · ')}</span></div>
+        ${act.isOrig
+          ? '<span style="font-size:0.7rem;color:var(--text-light);white-space:nowrap">Original</span>'
+          : `<button class="adm-act-del" data-id="${act.id}" title="Eliminar">✕</button>`}`;
+      list.appendChild(item);
+    });
+    list.querySelectorAll('.adm-act-del').forEach(btn=>{
+      btn.addEventListener('click',function(){
+        const id=this.dataset.id;
+        document.querySelector(`.act-card[data-adm-id="${id}"]`)?.remove();
+        actList=actList.filter(a=>a.id!==id);
+        admRenderActList();
+      });
+    });
+  }
+
+  /* —— TEXTOS —— */
+  function admInitTexts(){
+    const ht=document.querySelector('.hero-title');
+    if(ht){
+      document.getElementById('txtHeroTitle').value=ht.childNodes[0]?.textContent?.replace(/\n/g,'').trim()||'';
+      document.getElementById('txtHeroAccent').value=ht.querySelector('.hero-accent')?.textContent?.trim()||'';
+    }
+    const hd=document.querySelector('.hero-desc');
+    if(hd) document.getElementById('txtHeroDesc').value=hd.textContent.trim();
+    const ap=document.querySelectorAll('.about-text > p');
+    if(ap[0]) document.getElementById('txtAbout1').value=ap[0].innerText.trim();
+    if(ap[1]) document.getElementById('txtAbout2').value=ap[1].innerText.trim();
+    const q=document.querySelector('.abq-text');
+    if(q) document.getElementById('txtQuote').value=q.textContent.trim();
+    const em=document.querySelector('.footer-contact a[href^="mailto:"]');
+    if(em) document.getElementById('txtEmail').value=em.textContent.trim();
+    const ig=document.querySelector('.gallery-cta a');
+    if(ig) document.getElementById('txtInstagram').value=ig.href==='about:blank'?'':ig.href;
+    const fb=document.querySelector('.soc-btn[aria-label="Facebook"]');
+    if(fb) document.getElementById('txtFacebook').value=fb.href==='about:blank'?'':fb.href;
+    const wa=document.querySelector('.soc-btn[aria-label="WhatsApp"]');
+    if(wa) document.getElementById('txtWhatsapp').value=wa.href==='about:blank'?'':wa.href;
+  }
+
+  window.admApplyTexts=function(){
+    const ht=document.querySelector('.hero-title');
+    if(ht){
+      const title=document.getElementById('txtHeroTitle').value||'Abrimos mundos';
+      const accent=document.getElementById('txtHeroAccent').value||'a través de la lectura';
+      ht.innerHTML=`${title}<br/><span class="hero-accent">${accent}</span>`;
+    }
+    const hd=document.querySelector('.hero-desc');
+    if(hd) hd.textContent=document.getElementById('txtHeroDesc').value;
+    const ap=document.querySelectorAll('.about-text > p');
+    if(ap[0]) ap[0].innerHTML=document.getElementById('txtAbout1').value;
+    if(ap[1]) ap[1].innerHTML=document.getElementById('txtAbout2').value;
+    const q=document.querySelector('.abq-text');
+    if(q) q.textContent=document.getElementById('txtQuote').value;
+    const emailVal=document.getElementById('txtEmail').value.trim();
+    if(emailVal) document.querySelectorAll('.footer-contact a[href^="mailto:"]').forEach(a=>{ a.href='mailto:'+emailVal; a.textContent=emailVal; });
+    const igVal=document.getElementById('txtInstagram').value.trim();
+    const igLink=document.querySelector('.gallery-cta a');
+    if(igLink&&igVal) igLink.href=igVal;
+    const fbVal=document.getElementById('txtFacebook').value.trim();
+    const fbLink=document.querySelector('.soc-btn[aria-label="Facebook"]');
+    if(fbLink&&fbVal) fbLink.href=fbVal;
+    const waVal=document.getElementById('txtWhatsapp').value.trim();
+    const waLink=document.querySelector('.soc-btn[aria-label="WhatsApp"]');
+    if(waLink&&waVal) waLink.href=waVal;
+    showModal('¡Cambios aplicados!','Los textos se actualizaron. Ve a la pestaña Exportar para descargar el HTML con los cambios.');
+  };
+
+  /* —— EXPORTAR —— */
+  window.admExport=function(){
+    // Bake gallery images to DOM
+    galImgs.forEach((img,i)=>{
+      if(!img) return;
+      const gi=document.querySelectorAll('.gal-item')[i];
+      if(gi){ gi.style.backgroundImage=`url(${img})`; gi.style.backgroundSize='cover'; gi.style.backgroundPosition='center'; }
+    });
+    galLabels.forEach((lbl,i)=>{
+      const span=document.querySelectorAll('.gal-item')[i]?.querySelector('.gal-overlay span');
+      if(span) span.textContent=lbl;
+    });
+
+    // Temporarily hide admin panel for clean capture
+    const ov=document.getElementById('admOverlay');
+    const pov=document.getElementById('admPwOverlay');
+    ov.classList.remove('open'); pov.classList.remove('open');
+
+    setTimeout(()=>{
+      let html='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
+      // Update password in export
+      html=html.replace(/let ADM_PW='[^']*'/,"let ADM_PW='"+ADM_PW+"'");
+      const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download='PAQARINKAMA.html';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      // Reopen panel
+      setTimeout(()=>ov.classList.add('open'),200);
+    },100);
+  };
+
+  /* —— CAMBIAR CONTRASEÑA —— */
+  window.admChangePw=function(){
+    const p1=document.getElementById('admNewPw').value;
+    const p2=document.getElementById('admNewPw2').value;
+    if(!p1){ alert('Ingresa una contraseña.'); return; }
+    if(p1!==p2){ alert('Las contraseñas no coinciden.'); return; }
+    if(p1.length<4){ alert('Mínimo 4 caracteres.'); return; }
+    ADM_PW=p1;
+    document.getElementById('admNewPw').value='';
+    document.getElementById('admNewPw2').value='';
+    showModal('¡Contraseña cambiada!','Recuerda exportar el HTML para que la nueva contraseña quede guardada en el archivo.');
+  };
+
+})();
+/* ══════════════════ FIN ADMIN ══════════════════ */
+
+document.getElementById('volunteerForm')?.addEventListener('submit',e=>{e.preventDefault();showModal('¡Gracias por querer sumarte!','Recibimos tu solicitud. Te escribiremos pronto para darte la bienvenida al equipo.');e.target.reset();});
+document.getElementById('donateForm')?.addEventListener('submit',e=>{e.preventDefault();showModal('¡Gracias por tu interés!','Nos pondremos en contacto contigo para coordinar cómo puedes apoyar a PAQARINKAMA.');e.target.reset();});
+document.getElementById('subscribeForm')?.addEventListener('submit',e=>{e.preventDefault();showModal('¡Listo!','Te avisaremos cada vez que publiquemos una nueva actividad.');e.target.reset();});
+</script>
+</body>
+</html>
