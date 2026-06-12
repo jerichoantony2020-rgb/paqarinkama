@@ -110,6 +110,20 @@ a{text-decoration:none;color:inherit;}
 .gal-slot.filled .gal-rm{display:flex;}
 .gal-hint{font-size:.76rem;color:var(--text-light);margin-top:6px;line-height:1.5;}
 
+/* CROP MODAL */
+.crop-modal{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:20px;}
+.crop-modal.open{display:flex;}
+.crop-card{background:#fff;border-radius:20px;padding:28px 28px 24px;width:min(480px,100%);box-shadow:0 24px 60px rgba(0,0,0,.35);}
+.crop-card h3{font-family:var(--font-d);font-size:1.1rem;font-weight:700;margin-bottom:5px;}
+.crop-card>p{font-size:.8rem;color:var(--text-light);margin-bottom:16px;}
+.crop-preview-wrap{aspect-ratio:4/3;border-radius:12px;overflow:hidden;margin-bottom:12px;background:var(--g50);border:1.5px solid var(--border);}
+.crop-preview-wrap img{width:100%;height:100%;object-fit:cover;object-position:center;transition:object-position .2s;}
+.crop-pos-btns{display:flex;gap:8px;margin-bottom:18px;}
+.crop-pos-btn{flex:1;padding:10px 0;border-radius:10px;border:2px solid var(--border);background:var(--cream);font-size:.82rem;font-weight:600;color:var(--text-mid);cursor:pointer;transition:var(--tr);}
+.crop-pos-btn.active{border-color:var(--g500);background:var(--g50);color:var(--g700);}
+.crop-pos-btn:hover:not(.active){border-color:var(--g300);background:var(--white);}
+.crop-actions{display:flex;gap:10px;}
+
 /* ACTIVITIES */
 .act-form-card{background:var(--white);border:1.5px solid var(--border);border-radius:16px;padding:24px;margin-bottom:24px;}
 .act-form-card h3{font-family:var(--font-d);font-size:1rem;font-weight:700;color:var(--text);margin-bottom:18px;}
@@ -297,34 +311,63 @@ a{text-decoration:none;color:inherit;}
         <div class="txt-section">
           <h3>🌟 Sección Hero</h3>
           <div class="fg2">
-            <div class="field"><label>Título principal</label><input id="tHeroTitle" type="text"/></div>
-            <div class="field"><label>Texto en cursiva verde</label><input id="tHeroAccent" type="text"/></div>
+            <div class="field"><label>Título principal</label><input id="tHeroTitle" type="text" placeholder="Abrimos mundos"/></div>
+            <div class="field"><label>Texto en cursiva verde</label><input id="tHeroAccent" type="text" placeholder="a través de la lectura"/></div>
           </div>
-          <div class="field"><label>Descripción</label><textarea id="tHeroDesc"></textarea></div>
+          <div class="field"><label>Descripción bajo el título</label><textarea id="tHeroDesc" placeholder="Texto introductorio del hero..."></textarea></div>
         </div>
         <div class="txt-section">
           <h3>👥 Nosotros</h3>
+          <div class="field"><label>Título de sección</label><input id="tAboutTitle" type="text" placeholder="Somos mediadores del amanecer lector"/></div>
           <div class="field"><label>Párrafo 1</label><textarea id="tAbout1"></textarea></div>
           <div class="field"><label>Párrafo 2</label><textarea id="tAbout2"></textarea></div>
           <div class="field"><label>Cita destacada</label><textarea id="tQuote" rows="2"></textarea></div>
         </div>
         <div class="txt-section">
+          <h3>📋 Actividades</h3>
+          <div class="field"><label>Título de sección</label><input id="tActTitle" type="text" placeholder="Nuestras actividades"/></div>
+          <div class="field"><label>Descripción de sección</label><textarea id="tActDesc" rows="2" placeholder="Aquí compartimos lo que vivimos..."></textarea></div>
+        </div>
+        <div class="txt-section">
+          <h3>📷 Galería</h3>
+          <div class="field"><label>Título de sección</label><input id="tGalTitle" type="text" placeholder="Galería de recuerdos"/></div>
+          <div class="field"><label>Descripción de sección</label><textarea id="tGalDesc" rows="2" placeholder="Cada foto es un momento real..."></textarea></div>
+        </div>
+        <div class="txt-section">
           <h3>📧 Contacto y redes</h3>
           <div class="fg2">
-            <div class="field"><label>Correo</label><input id="tEmail" type="email"/></div>
-            <div class="field"><label>Instagram URL</label><input id="tInstagram" type="url"/></div>
+            <div class="field"><label>Correo</label><input id="tEmail" type="email" placeholder="hola@paqarinkama.org"/></div>
+            <div class="field"><label>Instagram URL</label><input id="tInstagram" type="url" placeholder="https://instagram.com/..."/></div>
           </div>
           <div class="fg2">
-            <div class="field"><label>Facebook URL</label><input id="tFacebook" type="url"/></div>
-            <div class="field"><label>WhatsApp URL</label><input id="tWhatsapp" type="url"/></div>
+            <div class="field"><label>Facebook URL</label><input id="tFacebook" type="url" placeholder="https://facebook.com/..."/></div>
+            <div class="field"><label>WhatsApp URL</label><input id="tWhatsapp" type="url" placeholder="https://wa.me/51..."/></div>
           </div>
         </div>
-        <button class="btn btn-primary" id="saveTextsBtn" onclick="saveTexts()">✓ Guardar todos los cambios</button>
+        <button class="btn btn-primary btn-full" id="saveTextsBtn" onclick="saveTexts()">✓ Guardar todos los cambios</button>
       </div>
 
     </div><!-- /content -->
   </div><!-- /main -->
 </div><!-- /adminApp -->
+
+<!-- CROP MODAL -->
+<div class="crop-modal" id="cropModal" onclick="if(event.target===this)cancelCrop()">
+  <div class="crop-card">
+    <h3>Encuadrar foto</h3>
+    <p>Elige qué parte de la imagen se mostrará en el recuadro 4:3.</p>
+    <div class="crop-preview-wrap"><img id="cropPreviewImg" src="" alt=""/></div>
+    <div class="crop-pos-btns">
+      <button class="crop-pos-btn" onclick="setCropPos('top')">↑ Arriba</button>
+      <button class="crop-pos-btn active" onclick="setCropPos('center')">⊙ Centro</button>
+      <button class="crop-pos-btn" onclick="setCropPos('bottom')">↓ Abajo</button>
+    </div>
+    <div class="crop-actions">
+      <button class="btn btn-outline" style="flex:1" onclick="cancelCrop()">Cancelar</button>
+      <button class="btn btn-primary" style="flex:2" id="confirmCropBtn" onclick="confirmCrop()">Subir foto →</button>
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -338,7 +381,7 @@ const db = supabase.createClient(SUPA_URL, SUPA_KEY);
 
 const CAT_COLOR = {taller:'#2d6b2a',docentes:'#4e9a44',biblioteca:'#3d8035',evento:'#1a4d1a'};
 const CAT_LABEL = {taller:'Taller',docentes:'Docentes',biblioteca:'Biblioteca',evento:'Evento'};
-const CONTENT_KEYS = ['heroTitle','heroAccent','heroDesc','about1','about2','quote','email','instagram','facebook','whatsapp'];
+const CONTENT_KEYS = ['heroTitle','heroAccent','heroDesc','aboutTitle','about1','about2','quote','actTitle','actDesc','galTitle','galDesc','email','instagram','facebook','whatsapp'];
 
 let currentGalSlot = -1;
 
@@ -457,52 +500,90 @@ async function initGallery(){
   });
 }
 
-document.getElementById('galFileInput').addEventListener('change', async function(){
-  if(!this.files[0] || currentGalSlot < 0) return;
-  const file = this.files[0];
-  const idx  = currentGalSlot;
-  const slot = document.querySelector(`.gal-slot[data-slot="${idx}"]`);
+/* ── CROP MODAL ── */
+let pendingFile = null, pendingSlot = -1, cropPos = 'center';
 
-  // Compress image
-  const compressed = await compressImage(file, 900, 0.82);
+document.getElementById('galFileInput').addEventListener('change', function(){
+  if(!this.files[0] || currentGalSlot < 0) return;
+  pendingFile = this.files[0];
+  pendingSlot = currentGalSlot;
+  cropPos = 'center';
+  const previewImg = document.getElementById('cropPreviewImg');
+  previewImg.src = URL.createObjectURL(pendingFile);
+  previewImg.style.objectPosition = 'center';
+  document.querySelectorAll('.crop-pos-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.crop-pos-btn')[1].classList.add('active');
+  document.getElementById('confirmCropBtn').disabled = false;
+  document.getElementById('confirmCropBtn').innerHTML = 'Subir foto →';
+  document.getElementById('cropModal').classList.add('open');
+  this.value = '';
+});
+
+function setCropPos(pos){
+  cropPos = pos;
+  const labels = ['top','center','bottom'];
+  document.getElementById('cropPreviewImg').style.objectPosition = pos;
+  document.querySelectorAll('.crop-pos-btn').forEach((b,i) => b.classList.toggle('active', labels[i]===pos));
+}
+
+function cancelCrop(){
+  const img = document.getElementById('cropPreviewImg');
+  URL.revokeObjectURL(img.src);
+  img.src = '';
+  document.getElementById('cropModal').classList.remove('open');
+  pendingFile = null; pendingSlot = -1;
+}
+
+async function confirmCrop(){
+  if(!pendingFile || pendingSlot < 0) return;
+  const btn = document.getElementById('confirmCropBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Subiendo...';
+
+  const file = pendingFile, idx = pendingSlot, pos = cropPos;
+  const slot = document.querySelector(`.gal-slot[data-slot="${idx}"]`);
+  document.getElementById('cropModal').classList.remove('open');
+  pendingFile = null; pendingSlot = -1;
 
   slot.classList.add('uploading');
+  const compressed = await compressImage(file, 1200, 0.85, pos);
 
-  // Upload to Supabase Storage
   const path = `slot-${idx}`;
   const { error: upErr } = await db.storage.from('gallery').upload(path, compressed, {
     contentType: 'image/jpeg', upsert: true
   });
-
   if(upErr){ toast('⚠️ Error al subir: '+upErr.message,'#dc2626'); slot.classList.remove('uploading'); return; }
 
   const { data: urlData } = db.storage.from('gallery').getPublicUrl(path);
-  const publicUrl = urlData.publicUrl + '?t=' + Date.now(); // cache bust
-
-  // Get current label
   const labelInput = slot.querySelector('.gal-lbl input');
-  const label = labelInput?.value || '';
-
-  await db.from('gallery').upsert({ slot_index: idx, image_url: urlData.publicUrl, label });
+  await db.from('gallery').upsert({ slot_index: idx, image_url: urlData.publicUrl, label: labelInput?.value||'' });
 
   slot.classList.remove('uploading');
   toast('✅ Foto publicada en el sitio');
-  initGallery();
-  updateStats();
-  this.value = '';
-});
+  initGallery(); updateStats();
+}
 
-function compressImage(file, maxPx, quality){
+function compressImage(file, maxPx, quality, position='center'){
   return new Promise(resolve=>{
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = ()=>{
       URL.revokeObjectURL(url);
-      let w=img.width, h=img.height;
-      if(w>maxPx||h>maxPx){ const r=Math.min(maxPx/w,maxPx/h); w=Math.round(w*r); h=Math.round(h*r); }
+      const ratio = 4/3;
+      let sx=0, sy=0, sw=img.width, sh=img.height;
+      if(img.width/img.height > ratio){
+        sw = Math.round(img.height * ratio);
+        sx = Math.round((img.width - sw)/2);
+      } else {
+        sh = Math.round(img.width / ratio);
+        if(position==='top') sy=0;
+        else if(position==='bottom') sy = img.height - sh;
+        else sy = Math.round((img.height - sh)/2);
+      }
+      let dw=sw, dh=sh;
+      if(dw>maxPx||dh>maxPx){ const r=Math.min(maxPx/dw,maxPx/dh); dw=Math.round(dw*r); dh=Math.round(dh*r); }
       const canvas=document.createElement('canvas');
-      canvas.width=w; canvas.height=h;
-      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      canvas.width=dw; canvas.height=dh;
+      canvas.getContext('2d').drawImage(img,sx,sy,sw,sh,0,0,dw,dh);
       canvas.toBlob(blob=>resolve(blob),'image/jpeg',quality);
     };
     img.src=url;

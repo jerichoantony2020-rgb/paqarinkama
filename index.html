@@ -559,6 +559,11 @@ async function loadFromSupabase(){
       if(c.instagram){const a=document.querySelector('.gallery-cta a');if(a)a.href=c.instagram;}
       if(c.facebook){const a=document.querySelector('.soc-btn[aria-label="Facebook"]');if(a)a.href=c.facebook;}
       if(c.whatsapp){const a=document.querySelector('.soc-btn[aria-label="WhatsApp"]');if(a)a.href=c.whatsapp;}
+      if(c.aboutTitle){const el=document.querySelector('.about-text .section-title');if(el)el.textContent=c.aboutTitle;}
+      if(c.actTitle){const el=document.querySelector('#actividades .section-title');if(el)el.textContent=c.actTitle;}
+      if(c.actDesc){const el=document.querySelector('#actividades .section-desc');if(el)el.textContent=c.actDesc;}
+      if(c.galTitle){const el=document.querySelector('#galeria .section-title');if(el)el.textContent=c.galTitle;}
+      if(c.galDesc){const el=document.querySelector('#galeria .section-desc');if(el)el.textContent=c.galDesc;}
     }
     /* ── 2. GALERÍA ── */
     const {data:gallery}=await db.from('gallery').select('*').order('slot_index');
