@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 220">
+
+  <!-- COLA (detrás del cuerpo) -->
+  <path d="M 108,118 Q 160,105 168,140 Q 174,168 150,175 Q 130,178 120,160 Q 110,142 108,118 Z" fill="#C86010"/>
+  <path d="M 116,128 Q 155,118 162,146 Q 166,164 148,170 Q 133,172 124,156 Q 116,140 116,128 Z" fill="#E07818"/>
+  <path d="M 138,152 Q 156,148 162,160 Q 160,174 148,172 Q 136,170 136,160 Z" fill="#F5DEB3"/>
+  <path d="M 142,156 Q 156,153 159,163 Q 157,172 147,170 Q 138,168 140,162 Z" fill="#FAF0D0"/>
+
+  <!-- CUERPO -->
+  <path d="M 32,122 Q 28,172 38,190 Q 65,208 114,203 Q 134,188 136,122 Q 120,106 90,104 Q 58,106 32,122 Z" fill="#C86010"/>
+  <!-- faceta izquierda oscura -->
+  <path d="M 32,122 Q 34,165 42,188 Q 54,202 74,206 Q 56,185 52,158 Q 46,136 44,118 Z" fill="#B05510"/>
+  <!-- faceta central clara -->
+  <path d="M 60,110 Q 90,104 120,110 Q 126,135 118,168 Q 106,190 90,194 Q 74,190 62,168 Q 54,135 60,110 Z" fill="#E07818"/>
+  <!-- panza crema -->
+  <path d="M 72,128 Q 90,120 108,128 Q 112,152 106,176 Q 98,190 90,192 Q 82,190 74,176 Q 68,152 72,128 Z" fill="#F5DEB3"/>
+  <path d="M 80,138 Q 90,132 100,138 Q 103,158 98,176 Q 94,186 90,187 Q 86,186 82,176 Q 77,158 80,138 Z" fill="#FAF0D0"/>
+  <!-- faceta derecha oscura -->
+  <path d="M 120,110 Q 132,118 136,138 Q 136,172 126,195 Q 116,205 100,208 Q 116,190 118,162 Q 120,136 120,110 Z" fill="#B05510"/>
+
+  <!-- PATA IZQUIERDA -->
+  <ellipse cx="62" cy="196" rx="14" ry="8" fill="#B05510"/>
+  <ellipse cx="62" cy="200" rx="11" ry="6" fill="#8B4010"/>
+  <ellipse cx="57" cy="201" rx="3.5" ry="2.5" fill="#6B2E08"/>
+  <ellipse cx="62" cy="203" rx="3" ry="2" fill="#6B2E08"/>
+  <ellipse cx="67" cy="201" rx="3.5" ry="2.5" fill="#6B2E08"/>
+
+  <!-- PATA DERECHA -->
+  <ellipse cx="118" cy="196" rx="14" ry="8" fill="#B05510"/>
+  <ellipse cx="118" cy="200" rx="11" ry="6" fill="#8B4010"/>
+  <ellipse cx="113" cy="201" rx="3.5" ry="2.5" fill="#6B2E08"/>
+  <ellipse cx="118" cy="203" rx="3" ry="2" fill="#6B2E08"/>
+  <ellipse cx="123" cy="201" rx="3.5" ry="2.5" fill="#6B2E08"/>
+
+  <!-- CUELLO / PECHO -->
+  <path d="M 70,100 Q 90,93 110,100 Q 114,118 90,120 Q 66,118 70,100 Z" fill="#E07818"/>
+  <path d="M 75,103 Q 90,96 105,103 Q 108,116 90,118 Q 72,116 75,103 Z" fill="#F5DEB3"/>
+
+  <!-- CABEZA BASE -->
+  <path d="M 42,65 Q 44,35 90,30 Q 136,35 138,65 Q 138,100 90,106 Q 42,100 42,65 Z" fill="#E07818"/>
+  <!-- Faceta izquierda -->
+  <path d="M 42,65 Q 46,42 64,36 Q 52,52 50,72 Q 48,86 56,97 Q 46,86 42,72 Z" fill="#C86010"/>
+  <!-- Faceta derecha -->
+  <path d="M 138,65 Q 134,42 116,36 Q 128,52 130,72 Q 132,86 124,97 Q 134,86 138,72 Z" fill="#C86010"/>
+  <!-- Faceta frente superior (más clara) -->
+  <path d="M 68,33 Q 90,27 112,33 Q 106,46 90,43 Q 74,46 68,33 Z" fill="#F5A030"/>
+  <!-- Frente clara -->
+  <path d="M 66,44 Q 90,36 114,44 Q 112,60 90,63 Q 68,60 66,44 Z" fill="#F0A840"/>
+
+  <!-- OREJA IZQUIERDA -->
+  <path d="M 50,54 Q 54,26 70,38 Q 64,46 60,54 Z" fill="#E07818"/>
+  <path d="M 52,52 Q 56,30 68,40 Q 62,47 59,52 Z" fill="#EDB870"/>
+  <path d="M 54,50 Q 58,33 66,42 Q 61,48 59,51 Z" fill="#FAD090"/>
+
+  <!-- OREJA DERECHA -->
+  <path d="M 130,54 Q 126,26 110,38 Q 116,46 120,54 Z" fill="#E07818"/>
+  <path d="M 128,52 Q 124,30 112,40 Q 118,47 121,52 Z" fill="#EDB870"/>
+  <path d="M 126,50 Q 122,33 114,42 Q 119,48 121,51 Z" fill="#FAD090"/>
+
+  <!-- CARA CREMA -->
+  <path d="M 58,60 Q 90,54 122,60 Q 124,76 118,90 Q 108,104 90,106 Q 72,104 62,90 Q 56,76 58,60 Z" fill="#F5DEB3"/>
+  <!-- Hocico -->
+  <ellipse cx="90" cy="85" rx="20" ry="14" fill="#FAF0D0"/>
+  <ellipse cx="90" cy="88" rx="16" ry="11" fill="#FFF8EC"/>
+
+  <!-- OJO IZQUIERDO -->
+  <circle cx="72" cy="68" r="7" fill="#1E0E04"/>
+  <circle cx="72" cy="68" r="5" fill="#2A1208"/>
+  <circle cx="74.5" cy="65.5" r="2.8" fill="white"/>
+  <circle cx="71" cy="70" r="1.2" fill="rgba(255,255,255,0.35)"/>
+
+  <!-- OJO DERECHO -->
+  <circle cx="108" cy="68" r="7" fill="#1E0E04"/>
+  <circle cx="108" cy="68" r="5" fill="#2A1208"/>
+  <circle cx="110.5" cy="65.5" r="2.8" fill="white"/>
+  <circle cx="107" cy="70" r="1.2" fill="rgba(255,255,255,0.35)"/>
+
+  <!-- NARIZ -->
+  <ellipse cx="90" cy="84" rx="5.5" ry="4" fill="#1E0E04"/>
+  <ellipse cx="88" cy="83" rx="2" ry="1.3" fill="rgba(255,255,255,0.3)"/>
+
+  <!-- BOCA -->
+  <path d="M 83,89 Q 90,94 97,89" stroke="#5C2508" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+  <line x1="90" y1="88" x2="90" y2="90" stroke="#5C2508" stroke-width="1.3"/>
+
+  <!-- BIGOTES -->
+  <line x1="52" y1="84" x2="74" y2="87" stroke="#5C2508" stroke-width="0.9" opacity="0.45"/>
+  <line x1="50" y1="89" x2="72" y2="90" stroke="#5C2508" stroke-width="0.9" opacity="0.45"/>
+  <line x1="106" y1="87" x2="128" y2="84" stroke="#5C2508" stroke-width="0.9" opacity="0.45"/>
+  <line x1="108" y1="90" x2="130" y2="89" stroke="#5C2508" stroke-width="0.9" opacity="0.45"/>
+
+  <!-- PLANTAS IZQUIERDA (verde PAQARINKAMA) -->
+  <path d="M 8,216 Q 4,196 14,184 Q 20,194 16,212 Z" fill="#3D8035"/>
+  <path d="M 18,218 Q 16,200 26,192 Q 32,202 26,216 Z" fill="#2D6B2A"/>
+  <path d="M 28,218 Q 30,202 38,196 Q 42,206 36,218 Z" fill="#4E9A44"/>
+  <path d="M 4,218 Q 6,205 13,200 Q 16,209 10,218 Z" fill="#6DB863"/>
+  <path d="M 36,220 Q 40,207 46,203 Q 48,212 42,220 Z" fill="#3D8035"/>
+
+  <!-- PLANTAS DERECHA -->
+  <path d="M 172,216 Q 176,196 166,184 Q 160,194 164,212 Z" fill="#3D8035"/>
+  <path d="M 162,218 Q 164,200 154,192 Q 148,202 154,216 Z" fill="#2D6B2A"/>
+  <path d="M 152,218 Q 150,202 142,196 Q 138,206 144,218 Z" fill="#4E9A44"/>
+  <path d="M 176,218 Q 174,205 167,200 Q 164,209 170,218 Z" fill="#6DB863"/>
+  <path d="M 144,220 Q 140,207 134,203 Q 132,212 138,220 Z" fill="#3D8035"/>
+
+</svg>
