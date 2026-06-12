@@ -111,17 +111,15 @@ a{text-decoration:none;color:inherit;}
 .gal-hint{font-size:.76rem;color:var(--text-light);margin-top:6px;line-height:1.5;}
 
 /* CROP MODAL */
-.crop-modal{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:20px;}
-.crop-modal.open{display:flex;}
+.crop-modal{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .22s;}
+.crop-modal.open{opacity:1;pointer-events:all;}
 .crop-card{background:#fff;border-radius:20px;padding:28px 28px 24px;width:min(480px,100%);box-shadow:0 24px 60px rgba(0,0,0,.35);}
 .crop-card h3{font-family:var(--font-d);font-size:1.1rem;font-weight:700;margin-bottom:5px;}
-.crop-card>p{font-size:.8rem;color:var(--text-light);margin-bottom:16px;}
-.crop-preview-wrap{aspect-ratio:4/3;border-radius:12px;overflow:hidden;margin-bottom:12px;background:var(--g50);border:1.5px solid var(--border);}
-.crop-preview-wrap img{width:100%;height:100%;object-fit:cover;object-position:center;transition:object-position .2s;}
-.crop-pos-btns{display:flex;gap:8px;margin-bottom:18px;}
-.crop-pos-btn{flex:1;padding:10px 0;border-radius:10px;border:2px solid var(--border);background:var(--cream);font-size:.82rem;font-weight:600;color:var(--text-mid);cursor:pointer;transition:var(--tr);}
-.crop-pos-btn.active{border-color:var(--g500);background:var(--g50);color:var(--g700);}
-.crop-pos-btn:hover:not(.active){border-color:var(--g300);background:var(--white);}
+.crop-card>p{font-size:.8rem;color:var(--text-light);margin-bottom:14px;}
+.crop-preview-wrap{aspect-ratio:4/3;border-radius:12px;overflow:hidden;margin-bottom:10px;background:#111;border:1.5px solid var(--border);position:relative;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none;}
+.crop-preview-wrap.dragging{cursor:grabbing;}
+#cropPreviewImg{position:absolute;top:0;left:0;pointer-events:none;user-select:none;-webkit-user-drag:none;}
+.crop-drag-hint{text-align:center;font-size:.74rem;color:var(--text-light);margin-bottom:14px;}
 .crop-actions{display:flex;gap:10px;}
 
 /* ACTIVITIES */
@@ -355,13 +353,11 @@ a{text-decoration:none;color:inherit;}
 <div class="crop-modal" id="cropModal" onclick="if(event.target===this)cancelCrop()">
   <div class="crop-card">
     <h3>Encuadrar foto</h3>
-    <p>Elige qué parte de la imagen se mostrará en el recuadro 4:3.</p>
-    <div class="crop-preview-wrap"><img id="cropPreviewImg" src="" alt=""/></div>
-    <div class="crop-pos-btns">
-      <button class="crop-pos-btn" onclick="setCropPos('top')">↑ Arriba</button>
-      <button class="crop-pos-btn active" onclick="setCropPos('center')">⊙ Centro</button>
-      <button class="crop-pos-btn" onclick="setCropPos('bottom')">↓ Abajo</button>
+    <p>Arrastra la imagen con el mouse para elegir qué parte se verá en el sitio.</p>
+    <div class="crop-preview-wrap" id="cropWrap">
+      <img id="cropPreviewImg" src="" alt="" draggable="false"/>
     </div>
+    <p class="crop-drag-hint">✥ Arrastra para reencuadrar · El recuadro es exactamente como se verá</p>
     <div class="crop-actions">
       <button class="btn btn-outline" style="flex:1" onclick="cancelCrop()">Cancelar</button>
       <button class="btn btn-primary" style="flex:2" id="confirmCropBtn" onclick="confirmCrop()">Subir foto →</button>
@@ -500,85 +496,119 @@ async function initGallery(){
   });
 }
 
-/* ── CROP MODAL ── */
-let pendingFile = null, pendingSlot = -1, cropPos = 'center';
+/* ── CROP MODAL (drag-to-frame) ── */
+let pendingFile = null, pendingSlot = -1;
+let cropState = { tx:0, ty:0, scale:1, imgW:0, imgH:0, fW:0, fH:0, objUrl:'' };
+let dragStart = null;
 
 document.getElementById('galFileInput').addEventListener('change', function(){
   if(!this.files[0] || currentGalSlot < 0) return;
   pendingFile = this.files[0];
   pendingSlot = currentGalSlot;
-  cropPos = 'center';
-  const previewImg = document.getElementById('cropPreviewImg');
-  previewImg.src = URL.createObjectURL(pendingFile);
-  previewImg.style.objectPosition = 'center';
-  document.querySelectorAll('.crop-pos-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.crop-pos-btn')[1].classList.add('active');
   document.getElementById('confirmCropBtn').disabled = false;
   document.getElementById('confirmCropBtn').innerHTML = 'Subir foto →';
   document.getElementById('cropModal').classList.add('open');
+  // Measure wrap after modal is visible (opacity-based, layout always active)
+  requestAnimationFrame(()=> requestAnimationFrame(()=> _initCropDrag(pendingFile)));
   this.value = '';
 });
 
-function setCropPos(pos){
-  cropPos = pos;
-  const labels = ['top','center','bottom'];
-  document.getElementById('cropPreviewImg').style.objectPosition = pos;
-  document.querySelectorAll('.crop-pos-btn').forEach((b,i) => b.classList.toggle('active', labels[i]===pos));
+function _initCropDrag(file){
+  if(cropState.objUrl) URL.revokeObjectURL(cropState.objUrl);
+  cropState.objUrl = URL.createObjectURL(file);
+  const tmpImg = new Image();
+  tmpImg.onload = ()=>{
+    cropState.imgW = tmpImg.naturalWidth;
+    cropState.imgH = tmpImg.naturalHeight;
+    const wrap = document.getElementById('cropWrap');
+    const r = wrap.getBoundingClientRect();
+    cropState.fW = r.width;
+    cropState.fH = r.height;
+    cropState.scale = Math.max(cropState.fW / cropState.imgW, cropState.fH / cropState.imgH);
+    const sW = cropState.imgW * cropState.scale;
+    const sH = cropState.imgH * cropState.scale;
+    cropState.tx = (cropState.fW - sW) / 2;
+    cropState.ty = (cropState.fH - sH) / 2;
+    const img = document.getElementById('cropPreviewImg');
+    img.src = cropState.objUrl;
+    img.style.width  = sW + 'px';
+    img.style.height = sH + 'px';
+    img.style.transform = `translate(${cropState.tx}px,${cropState.ty}px)`;
+  };
+  tmpImg.src = cropState.objUrl;
 }
 
+(function(){
+  const wrap = document.getElementById('cropWrap');
+  function clamp(tx, ty){
+    const sW = cropState.imgW * cropState.scale;
+    const sH = cropState.imgH * cropState.scale;
+    return {
+      tx: Math.min(0, Math.max(cropState.fW - sW, tx)),
+      ty: Math.min(0, Math.max(cropState.fH - sH, ty))
+    };
+  }
+  function move(x, y){
+    if(!dragStart) return;
+    const c = clamp(x - dragStart.ox, y - dragStart.oy);
+    cropState.tx = c.tx; cropState.ty = c.ty;
+    document.getElementById('cropPreviewImg').style.transform = `translate(${c.tx}px,${c.ty}px)`;
+  }
+  wrap.addEventListener('mousedown', e=>{
+    dragStart = { ox: e.clientX - cropState.tx, oy: e.clientY - cropState.ty };
+    wrap.classList.add('dragging'); e.preventDefault();
+  });
+  window.addEventListener('mousemove', e=>{ if(dragStart) move(e.clientX, e.clientY); });
+  window.addEventListener('mouseup', ()=>{ dragStart=null; wrap.classList.remove('dragging'); });
+  wrap.addEventListener('touchstart', e=>{
+    const t=e.touches[0];
+    dragStart = { ox: t.clientX - cropState.tx, oy: t.clientY - cropState.ty };
+    wrap.classList.add('dragging'); e.preventDefault();
+  },{passive:false});
+  wrap.addEventListener('touchmove', e=>{
+    const t=e.touches[0]; move(t.clientX, t.clientY); e.preventDefault();
+  },{passive:false});
+  wrap.addEventListener('touchend', ()=>{ dragStart=null; wrap.classList.remove('dragging'); });
+})();
+
 function cancelCrop(){
-  const img = document.getElementById('cropPreviewImg');
-  URL.revokeObjectURL(img.src);
-  img.src = '';
   document.getElementById('cropModal').classList.remove('open');
-  pendingFile = null; pendingSlot = -1;
+  document.getElementById('cropPreviewImg').src='';
+  if(cropState.objUrl){ URL.revokeObjectURL(cropState.objUrl); cropState.objUrl=''; }
+  pendingFile=null; pendingSlot=-1; dragStart=null;
 }
 
 async function confirmCrop(){
   if(!pendingFile || pendingSlot < 0) return;
   const btn = document.getElementById('confirmCropBtn');
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Subiendo...';
-
-  const file = pendingFile, idx = pendingSlot, pos = cropPos;
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Subiendo...';
+  const sx = Math.max(0, Math.round(-cropState.tx / cropState.scale));
+  const sy = Math.max(0, Math.round(-cropState.ty / cropState.scale));
+  const sw = Math.round(cropState.fW / cropState.scale);
+  const sh = Math.round(cropState.fH / cropState.scale);
+  const file=pendingFile, idx=pendingSlot;
+  cancelCrop();
   const slot = document.querySelector(`.gal-slot[data-slot="${idx}"]`);
-  document.getElementById('cropModal').classList.remove('open');
-  pendingFile = null; pendingSlot = -1;
-
   slot.classList.add('uploading');
-  const compressed = await compressImage(file, 1200, 0.85, pos);
-
-  const path = `slot-${idx}`;
-  const { error: upErr } = await db.storage.from('gallery').upload(path, compressed, {
-    contentType: 'image/jpeg', upsert: true
-  });
+  const compressed = await compressImageCrop(file, sx, sy, sw, sh, 1200, 0.85);
+  const path=`slot-${idx}`;
+  const { error:upErr } = await db.storage.from('gallery').upload(path, compressed, { contentType:'image/jpeg', upsert:true });
   if(upErr){ toast('⚠️ Error al subir: '+upErr.message,'#dc2626'); slot.classList.remove('uploading'); return; }
-
-  const { data: urlData } = db.storage.from('gallery').getPublicUrl(path);
+  const { data:urlData } = db.storage.from('gallery').getPublicUrl(path);
   const labelInput = slot.querySelector('.gal-lbl input');
-  await db.from('gallery').upsert({ slot_index: idx, image_url: urlData.publicUrl, label: labelInput?.value||'' });
-
+  await db.from('gallery').upsert({ slot_index:idx, image_url:urlData.publicUrl, label:labelInput?.value||'' });
   slot.classList.remove('uploading');
   toast('✅ Foto publicada en el sitio');
   initGallery(); updateStats();
 }
 
-function compressImage(file, maxPx, quality, position='center'){
+function compressImageCrop(file, sx, sy, sw, sh, maxPx, quality){
   return new Promise(resolve=>{
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = ()=>{
+    const img=new Image(), url=URL.createObjectURL(file);
+    img.onload=()=>{
       URL.revokeObjectURL(url);
-      const ratio = 4/3;
-      let sx=0, sy=0, sw=img.width, sh=img.height;
-      if(img.width/img.height > ratio){
-        sw = Math.round(img.height * ratio);
-        sx = Math.round((img.width - sw)/2);
-      } else {
-        sh = Math.round(img.width / ratio);
-        if(position==='top') sy=0;
-        else if(position==='bottom') sy = img.height - sh;
-        else sy = Math.round((img.height - sh)/2);
-      }
+      sx=Math.max(0,Math.min(sx,img.width)); sy=Math.max(0,Math.min(sy,img.height));
+      sw=Math.min(sw,img.width-sx); sh=Math.min(sh,img.height-sy);
       let dw=sw, dh=sh;
       if(dw>maxPx||dh>maxPx){ const r=Math.min(maxPx/dw,maxPx/dh); dw=Math.round(dw*r); dh=Math.round(dh*r); }
       const canvas=document.createElement('canvas');
